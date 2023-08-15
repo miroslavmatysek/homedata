@@ -1,4 +1,6 @@
+using HomeData.Tasks.Solax.Model;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Quartz;
 
 namespace HomeData.Tasks.Solax;
@@ -38,6 +40,7 @@ public class SolaxX3G4JobTask : IJobTask
                 if (response.IsSuccessStatusCode)
                 {
                     var data = await response.Content.ReadAsStringAsync();
+                    var rawData = JsonConvert.DeserializeObject<SolaxInvertedRawData>(data);
                 }
             }
 
@@ -46,8 +49,11 @@ public class SolaxX3G4JobTask : IJobTask
         _logger.LogInformation("Solax task finished");
     }
 
+    public bool IsInit { get; private set; }
+
     public void Init(ILogger logger)
     {
+        IsInit = true;
         _logger = logger;
         _ipAddress = "192.168.88.238";
         _pass = "SVNUKHYLSA";

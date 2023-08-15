@@ -5,5 +5,6 @@ namespace HomeData.Tasks;
 
 public interface IJobTask : IJob
 {
+    bool IsInit { get; }
     void Init(ILogger logger);
 }

@@ -21,7 +21,7 @@ public class QuartzJobFactory : IJobFactory, IDisposable
         var result = GetScope($"{bundle.JobDetail.Key.Group}-{bundle.JobDetail.Key.Name}")
             .Resolve(bundle.JobDetail.JobType);
 
-        if (result is IJobTask jobTask)
+        if (result is IJobTask { IsInit: false } jobTask)
         {
             jobTask.Init(_container.Resolve<ILogger>());
             return jobTask;
