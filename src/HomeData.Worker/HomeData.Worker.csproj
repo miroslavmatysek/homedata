@@ -13,6 +13,25 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="DryIoc.dll" Version="5.4.1" />
+        <PackageReference Include="DryIoc.Microsoft.DependencyInjection" Version="6.2.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
+        <PackageReference Include="NLog" Version="5.2.3" />
+        <PackageReference Include="NLog.Extensions.Logging" Version="5.3.3" />
+        <PackageReference Include="Quartz" Version="3.7.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\HomeData.DataAccess.Influxdb\HomeData.DataAccess.Influxdb.csproj" />
+      <ProjectReference Include="..\HomeData.Tasks.Manager\HomeData.Tasks.Manager.csproj" />
+      <ProjectReference Include="..\HomeData\HomeData.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Remove="nlog.config" />
+      <None Include="nlog.config">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 </Project>
