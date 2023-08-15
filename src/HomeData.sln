@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.DataAccess.Influxd
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Tasks.Manager", "HomeData.Tasks.Manager\HomeData.Tasks.Manager.csproj", "{EDFD0B8B-9AB6-472B-8B9E-BA66F5CC9251}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Tasks.Solax", "HomeData.Tasks.Solax\HomeData.Tasks.Solax.csproj", "{705A87FC-290C-4578-A76D-4E412C7AE646}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,5 +37,9 @@ Global
 		{EDFD0B8B-9AB6-472B-8B9E-BA66F5CC9251}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDFD0B8B-9AB6-472B-8B9E-BA66F5CC9251}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EDFD0B8B-9AB6-472B-8B9E-BA66F5CC9251}.Release|Any CPU.Build.0 = Release|Any CPU
+		{705A87FC-290C-4578-A76D-4E412C7AE646}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{705A87FC-290C-4578-A76D-4E412C7AE646}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{705A87FC-290C-4578-A76D-4E412C7AE646}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{705A87FC-290C-4578-A76D-4E412C7AE646}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

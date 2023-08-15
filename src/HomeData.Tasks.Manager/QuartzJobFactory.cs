@@ -1,4 +1,5 @@
 using DryIoc;
+using Microsoft.Extensions.Logging;
 using Quartz;
 using Quartz.Spi;
 
@@ -17,8 +18,15 @@ public class QuartzJobFactory : IJobFactory, IDisposable
 
     public IJob NewJob(TriggerFiredBundle bundle, IScheduler scheduler)
     {
-        return GetScope($"{bundle.JobDetail.Key.Group}-{bundle.JobDetail.Key.Name}")
-            .Resolve(bundle.JobDetail.JobType) as IJob;
+        var result = GetScope($"{bundle.JobDetail.Key.Group}-{bundle.JobDetail.Key.Name}")
+            .Resolve(bundle.JobDetail.JobType);
+
+        if (result is IJobTask jobTask)
+        {
+            jobTask.Init(_container.Resolve<ILogger>());
+            return jobTask;
+        }
+        return (IJob)result;
     }
 
     private IResolverContext GetScope(string key)

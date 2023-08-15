@@ -25,6 +25,7 @@
     <ItemGroup>
       <ProjectReference Include="..\HomeData.DataAccess.Influxdb\HomeData.DataAccess.Influxdb.csproj" />
       <ProjectReference Include="..\HomeData.Tasks.Manager\HomeData.Tasks.Manager.csproj" />
+      <ProjectReference Include="..\HomeData.Tasks.Solax\HomeData.Tasks.Solax.csproj" />
       <ProjectReference Include="..\HomeData\HomeData.csproj" />
     </ItemGroup>
 
