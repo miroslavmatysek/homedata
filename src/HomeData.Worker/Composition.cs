@@ -1,5 +1,7 @@
 using DryIoc;
+using HomeData.Tasks;
 using HomeData.Tasks.Manager;
+using HomeData.Tasks.Solax;
 using NLog;
 using NLog.Extensions.Logging;
 using Quartz;
@@ -44,6 +46,8 @@ public static class Composition
 
     public static Container AddServices(this Container container)
     {
+        container.Register<ITaskManager, QuartzTaskManager>(Reuse.Singleton);
+        container.Register<SolaxX3G4JobTask>(Reuse.Singleton);
         return container;
     }
 }

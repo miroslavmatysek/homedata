@@ -54,7 +54,7 @@ public class QuartzTaskManager : ITaskManager
             .WithIdentity(id, DefaultGroup)
             .StartNow()
             .WithSimpleSchedule(x => x
-                .WithIntervalInSeconds(2)
+                .WithIntervalInSeconds(30)
                 .RepeatForever())
             .Build();
 
