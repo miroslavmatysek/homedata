@@ -8,5 +8,7 @@ public class TaskConfig
 
     public string Bucket { get; set; }
 
+    public TimeSpan Interval { get; set; }
+
     public Dictionary<string, string> Params { get; set; } = new Dictionary<string, string>();
 }

@@ -1,3 +1,4 @@
+using HomeData.Model.Config;
 using HomeData.Tasks.Solax;
 using Microsoft.Extensions.Logging;
 using Quartz;
@@ -12,16 +13,18 @@ public class QuartzTaskManager : ITaskManager
     private readonly ILogger<QuartzTaskManager> _logger;
     private readonly ISchedulerFactory _schedulerFactory;
     private readonly IJobFactory _jobFactory;
+    private readonly TasksConfig _tasksConfig;
 
 
     private IScheduler _scheduler;
 
     public QuartzTaskManager(ILogger<QuartzTaskManager> logger, ISchedulerFactory schedulerFactory,
-        IJobFactory jobFactory)
+        IJobFactory jobFactory, TasksConfig tasksConfig)
     {
         _logger = logger;
         _schedulerFactory = schedulerFactory;
         _jobFactory = jobFactory;
+        _tasksConfig = tasksConfig;
     }
 
     public async Task StartAsync()
@@ -44,17 +47,28 @@ public class QuartzTaskManager : ITaskManager
         // Tell the scheduler to use the custom job factory
         _scheduler.JobFactory = _jobFactory;
 
-        await AddJob<SolaxX3G4JobTask>();
+        foreach (var item in _tasksConfig.Items)
+        {
+            switch (item.Name.ToLower())
+            {
+                case "solaxx3g4":
+                    await AddJob<SolaxX3G4JobTask>(item);
+                    break;
+                default:
+                    _logger.LogWarning("Task: {Name} is not supported", item.Name);
+                    break;
+            }
+        }
     }
 
-    private async Task AddJob<T>() where T : IJobTask
+    private async Task AddJob<T>(TaskConfig tc) where T : IJobTask
     {
         var id = nameof(T);
         ITrigger trigger = TriggerBuilder.Create()
             .WithIdentity(id, DefaultGroup)
             .StartNow()
             .WithSimpleSchedule(x => x
-                .WithIntervalInSeconds(30)
+                .WithInterval(tc.Interval)
                 .RepeatForever())
             .Build();
 
