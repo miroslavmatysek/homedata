@@ -78,4 +78,50 @@ public class SolaxX3G4Data
     /// in Watts.
     /// </summary>
     public int PowerPv2 { get; set; }
+
+    /// <summary>
+    /// in Watts.
+    /// </summary>
+    public long FeedInPower { get; set; }
+
+    /// <summary>
+    /// In kWh.
+    /// </summary>
+    public decimal FeedInEnergy { get; set; }
+
+    /// <summary>
+    /// In kWh
+    /// </summary>
+    public decimal ConsumedEnergy { get; set; }
+
+    /// <summary>
+    /// in celsius degree.
+    /// </summary>
+    public int? RadiatorTemperature { get; set; }
+
+    /// <summary>
+    /// In kWh.
+    /// </summary>
+    public decimal YieldToday { get; set; }
+
+    /// <summary>
+    /// In kWh.
+    /// </summary>
+    public decimal YieldTotal { get; set; }
+
+    /// <summary>
+    /// In %.
+    /// </summary>
+    public int? BatteryCapacity { get; set; }
+
+    /// <summary>
+    /// In degree of celsius.
+    /// </summary>
+    public int? BatteryTemperature { get; set; }
+
+    /// <summary>
+    /// in Watts.
+    /// </summary>
+    public int? BatteryPower { get; set; }
+
 }

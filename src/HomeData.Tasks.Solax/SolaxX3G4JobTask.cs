@@ -70,17 +70,35 @@ public class SolaxX3G4JobTask : IJobTask
         fields.With(nameof(processedData.Grid1Voltage), processedData.Grid1Voltage)
             .With(nameof(processedData.Grid2Voltage), processedData.Grid2Voltage)
             .With(nameof(processedData.Grid3Voltage), processedData.Grid3Voltage)
+
             .With(nameof(processedData.Grid1Current), processedData.Grid1Current)
             .With(nameof(processedData.Grid2Current), processedData.Grid2Current)
             .With(nameof(processedData.Grid3Current), processedData.Grid3Current)
+
             .With(nameof(processedData.Grid1Frequency), processedData.Grid1Frequency)
             .With(nameof(processedData.Grid2Frequency), processedData.Grid2Frequency)
             .With(nameof(processedData.Grid3Frequency), processedData.Grid3Frequency)
+
             .With(nameof(processedData.Grid1Power), processedData.Grid1Power)
             .With(nameof(processedData.Grid2Power), processedData.Grid2Power)
             .With(nameof(processedData.Grid3Power), processedData.Grid3Power)
+
             .With(nameof(processedData.PowerPv1), processedData.PowerPv1)
-            .With(nameof(processedData.PowerPv2), processedData.PowerPv2);
+            .With(nameof(processedData.PowerPv2), processedData.PowerPv2)
+
+            .With(nameof(processedData.BatteryCapacity), processedData.BatteryCapacity)
+            .With(nameof(processedData.BatteryPower), processedData.BatteryPower)
+            .With(nameof(processedData.BatteryTemperature), processedData.BatteryTemperature)
+
+            .With(nameof(processedData.RadiatorTemperature), processedData.RadiatorTemperature)
+
+            .With(nameof(processedData.FeedInPower), processedData.FeedInPower)
+            .With(nameof(processedData.FeedInEnergy), processedData.FeedInPower)
+            .With(nameof(processedData.ConsumedEnergy), processedData.ConsumedEnergy)
+
+            .With(nameof(processedData.YieldToday), processedData.YieldToday)
+            .With(nameof(processedData.YieldTotal), processedData.YieldTotal);
+
         await _monitoringDataAccess.WritePointAsync(fields);
     }
 
@@ -131,7 +149,20 @@ public class SolaxX3G4JobTask : IJobTask
 
 
             PowerPv1 = data.Data.ToInt(14) ?? 0,
-            PowerPv2 = data.Data.ToInt(15) ?? 0
+            PowerPv2 = data.Data.ToInt(15) ?? 0,
+
+            FeedInPower = (data.Data.ToAccumulatedInt(34,35) ?? 0).ToSigned32(),
+            FeedInEnergy = (data.Data.ToAccumulatedInt(86,87) ?? 0).ToDecimal(2) ?? 0.0m,
+            ConsumedEnergy = (data.Data.ToAccumulatedInt(88,89)?? 0).ToDecimal(2) ?? 0.0m,
+
+            YieldTotal = (data.Data.ToAccumulatedInt(68,69) ?? 0).ToDecimal(1) ?? 0.0M,
+            YieldToday = data.Data.ToDecimal(70,1) ?? 0.0m,
+
+            RadiatorTemperature = data.Data.ToInt(54, true),
+
+            BatteryCapacity = data.Data.ToInt(103),
+            BatteryTemperature = data.Data.ToInt(105, true),
+            BatteryPower = data.Data.ToInt(41, true)
         };
     }
 }
