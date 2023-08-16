@@ -2,6 +2,8 @@ namespace HomeData.Tasks.Solax.Model;
 
 public class SolaxX3G4Data
 {
+    public DateTime Time { get; set; }
+
     public string Version { get; set; }
 
     public string SerialNumber { get; set; }

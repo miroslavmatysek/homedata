@@ -1,4 +1,7 @@
 using DryIoc;
+using HomeData.DataAccess;
+using HomeData.DataAccess.Influxdb;
+using HomeData.Model.Config;
 using HomeData.Tasks;
 using HomeData.Tasks.Manager;
 using HomeData.Tasks.Solax;
@@ -48,6 +51,19 @@ public static class Composition
     {
         container.Register<ITaskManager, QuartzTaskManager>(Reuse.Singleton);
         container.Register<SolaxX3G4JobTask>(Reuse.Singleton);
+        container.Register<IDataAccessFactory, InfluxDataAccessFactory>(Reuse.Singleton);
+        return container;
+    }
+
+    public static Container AddConfiguration(this Container container, IConfiguration configuration)
+    {
+        var tasksConfig = new TasksConfig();
+        configuration.Bind("tasks", tasksConfig);
+        container.Use(tasksConfig);
+
+        DataAccessConfig dataAccessConfig = new DataAccessConfig();
+        configuration.Bind("dataAccess", dataAccessConfig);
+        container.Use(dataAccessConfig);
         return container;
     }
 }

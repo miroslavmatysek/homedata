@@ -1,0 +1,41 @@
+using HomeData.DataAccess.Influxdb.Model;
+using HomeData.DataAccess.Model;
+using InfluxDB.Client;
+using InfluxDB.Client.Api.Domain;
+using InfluxDB.Client.Writes;
+
+namespace HomeData.DataAccess.Influxdb;
+
+public class InfluxMonitoringDataAccess : IMonitoringDataAccess
+{
+    private readonly IInfluxDBClient _client;
+    private readonly string _bucket;
+    private readonly string _organization;
+    private readonly string _measurement;
+
+    public InfluxMonitoringDataAccess(IInfluxDBClient client, string bucket, string organization, string measurement)
+    {
+        _client = client;
+        _bucket = bucket;
+        _organization = organization;
+        _measurement = measurement;
+    }
+
+    public IMeasurementFieldContainer Create(DateTime time)
+    {
+        var pd = PointData.Measurement(_measurement).Timestamp(time, WritePrecision.S);
+        return new InfluxMeasurementFieldContainer(pd);
+    }
+
+    public async Task WritePointAsync(string field, int value, DateTime time)
+    {
+        var point = PointData.Measurement(_measurement).Field(field, value).Timestamp(time, WritePrecision.S);
+        await _client.GetWriteApiAsync().WritePointAsync(point, _bucket, _organization);
+    }
+
+    public async Task WritePointAsync(IMeasurementFieldContainer points)
+    {
+        if (points is InfluxMeasurementFieldContainer pointsData)
+            await _client.GetWriteApiAsync().WritePointAsync(pointsData.Data, _bucket, _organization);
+    }
+}

@@ -17,6 +17,7 @@ public static class Program
             .ConfigureContainer<Container>((hostContext, container) =>
             {
                 container.AddNLog()
+                    .AddConfiguration(hostContext.Configuration)
                     .AddQuartz()
                     .AddServices();
                 container.Register<Worker>();
