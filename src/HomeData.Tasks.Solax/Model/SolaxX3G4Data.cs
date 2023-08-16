@@ -124,4 +124,14 @@ public class SolaxX3G4Data
     /// </summary>
     public int? BatteryPower { get; set; }
 
+    /// <summary>
+    /// in Watts.
+    /// </summary>
+    public int? InverterPower { get; set; }
+
+    /// <summary>
+    /// In Watts
+    /// </summary>
+    public int? CurrentHousePower { get; set; }
+
 }

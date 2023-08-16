@@ -97,7 +97,10 @@ public class SolaxX3G4JobTask : IJobTask
             .With(nameof(processedData.ConsumedEnergy), processedData.ConsumedEnergy)
 
             .With(nameof(processedData.YieldToday), processedData.YieldToday)
-            .With(nameof(processedData.YieldTotal), processedData.YieldTotal);
+            .With(nameof(processedData.YieldTotal), processedData.YieldTotal)
+
+            .With(nameof(processedData.InverterPower), processedData.InverterPower)
+            .With(nameof(processedData.CurrentHousePower), processedData.CurrentHousePower);
 
         await _monitoringDataAccess.WritePointAsync(fields);
     }
@@ -142,6 +145,9 @@ public class SolaxX3G4JobTask : IJobTask
             Grid1Power = data.Data.ToInt(6, true) ?? 0,
             Grid2Power = data.Data.ToInt(7, true) ?? 0,
             Grid3Power = data.Data.ToInt(8, true) ?? 0,
+
+            InverterPower = data.Data.ToInt(9, true),
+            CurrentHousePower = data.Data.ToInt(47),
 
             Grid1Frequency = data.Data.ToDecimal(16, 2),
             Grid2Frequency = data.Data.ToDecimal(17, 2),
