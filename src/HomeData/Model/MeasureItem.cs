@@ -15,7 +15,7 @@ public class MeasureItem
 
     public bool Changed { get; set; }
 
-    public object? Value { get; set; }
+    public object? ItemValue { get; set; }
 
     public MeasureItem(string field)
     {

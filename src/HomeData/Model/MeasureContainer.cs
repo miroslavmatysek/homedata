@@ -18,7 +18,7 @@ public class MeasureContainer
             DateTime = Time,
             LastChanged = lastChanged ?? Time,
             Changed = changed,
-            Value = value
+            ItemValue = value
         });
     }
 
@@ -36,10 +36,10 @@ public class MeasureContainer
             if (_data.TryGetValue(item.Key, out var old))
             {
                 var equals = Compare(old, item.Value);
-                result.Add(item.Key, item.Value, !equals, equals ? old.LastChanged : null);
+                result.Add(item.Key, item.Value.ItemValue, !equals, equals ? old.LastChanged : null);
             }
             else
-                result.Add(item.Key, item.Value, true);
+                result.Add(item.Key, item.Value.ItemValue, true);
         }
 
         return result;
@@ -48,11 +48,11 @@ public class MeasureContainer
     private static bool Compare(MeasureItem oldItem, MeasureItem newItem)
     {
         var result = false;
-        if (oldItem.Value == null && newItem.Value == null)
+        if (oldItem.ItemValue == null && newItem.ItemValue == null)
             result = true;
-        else if (oldItem.Value == null || newItem.Value == null)
+        else if (oldItem.ItemValue == null || newItem.ItemValue == null)
             result = false;
-        else if (oldItem.Value.Equals(newItem.Value))
+        else if (oldItem.ItemValue.Equals(newItem.ItemValue))
             result = true;
 
         if (result)

@@ -35,7 +35,7 @@ public class SolaxX3G4JobTask : IJobTask
         _httpClient = new HttpClient();
         _realTimeBody = new Dictionary<string, string>();
         _realTimeBody.Add(OptTypeBodyParam, RealTimeOptValue);
-        _lastContainer = null;
+        _lastContainer = new MeasureContainer(DateTime.Now);
     }
 
     public async Task Execute(IJobExecutionContext context)

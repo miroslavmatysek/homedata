@@ -33,7 +33,7 @@ public class InfluxMeasurementFieldContainer : IMeasurementFieldContainer
         return this;
     }
 
-    public IMeasurementFieldContainer With(string name, object? value)
+    private IMeasurementFieldContainer With(string name, object? value)
     {
         if (value != null)
             _pointData = _pointData.Field(name, value);
@@ -43,17 +43,7 @@ public class InfluxMeasurementFieldContainer : IMeasurementFieldContainer
     public IMeasurementFieldContainer With(MeasureItem? item)
     {
         if (item != null)
-            With(item.Field, item.Value);
-        return this;
-    }
-
-    public IMeasurementFieldContainer With(MeasureContainer mc)
-    {
-        foreach (var item in mc.Data)
-        {
-            With(item.Field, item.Value);
-        }
-
+            With(item.Field, item.ItemValue);
         return this;
     }
 
