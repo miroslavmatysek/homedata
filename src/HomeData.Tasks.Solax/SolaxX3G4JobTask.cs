@@ -1,4 +1,5 @@
 using HomeData.DataAccess;
+using HomeData.Model;
 using HomeData.Tasks.Solax.Extensions;
 using HomeData.Tasks.Solax.Model;
 using Microsoft.Extensions.Logging;
@@ -19,6 +20,7 @@ public class SolaxX3G4JobTask : IJobTask
 
     private readonly HttpClient _httpClient;
     private readonly Dictionary<string, string> _realTimeBody;
+    private readonly TimeSpan _minDataInterval  = TimeSpan.FromSeconds(60);
     private ILogger _logger;
     private IMonitoringDataAccess _monitoringDataAccess;
 
@@ -26,12 +28,14 @@ public class SolaxX3G4JobTask : IJobTask
     private string _ipAddress;
     private string _pass;
     private string _url;
+    private MeasureContainer _lastContainer;
 
     public SolaxX3G4JobTask()
     {
         _httpClient = new HttpClient();
         _realTimeBody = new Dictionary<string, string>();
         _realTimeBody.Add(OptTypeBodyParam, RealTimeOptValue);
+        _lastContainer = null;
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -64,45 +68,21 @@ public class SolaxX3G4JobTask : IJobTask
         }
     }
 
-    private async Task SaveData(SolaxX3G4Data processedData)
+    private async Task SaveData(MeasureContainer processedData)
     {
-        var fields = _monitoringDataAccess.Create(processedData.Time);
-        fields.With(nameof(processedData.Grid1Voltage), processedData.Grid1Voltage)
-            .With(nameof(processedData.Grid2Voltage), processedData.Grid2Voltage)
-            .With(nameof(processedData.Grid3Voltage), processedData.Grid3Voltage)
+        MeasureContainer toSave = _lastContainer == null ? processedData : _lastContainer.Merge(processedData);
 
-            .With(nameof(processedData.Grid1Current), processedData.Grid1Current)
-            .With(nameof(processedData.Grid2Current), processedData.Grid2Current)
-            .With(nameof(processedData.Grid3Current), processedData.Grid3Current)
-
-            .With(nameof(processedData.Grid1Frequency), processedData.Grid1Frequency)
-            .With(nameof(processedData.Grid2Frequency), processedData.Grid2Frequency)
-            .With(nameof(processedData.Grid3Frequency), processedData.Grid3Frequency)
-
-            .With(nameof(processedData.Grid1Power), processedData.Grid1Power)
-            .With(nameof(processedData.Grid2Power), processedData.Grid2Power)
-            .With(nameof(processedData.Grid3Power), processedData.Grid3Power)
-
-            .With(nameof(processedData.PowerPv1), processedData.PowerPv1)
-            .With(nameof(processedData.PowerPv2), processedData.PowerPv2)
-
-            .With(nameof(processedData.BatteryCapacity), processedData.BatteryCapacity)
-            .With(nameof(processedData.BatteryPower), processedData.BatteryPower)
-            .With(nameof(processedData.BatteryTemperature), processedData.BatteryTemperature)
-
-            .With(nameof(processedData.RadiatorTemperature), processedData.RadiatorTemperature)
-
-            .With(nameof(processedData.FeedInPower), processedData.FeedInPower)
-            .With(nameof(processedData.FeedInEnergy), processedData.FeedInPower)
-            .With(nameof(processedData.ConsumedEnergy), processedData.ConsumedEnergy)
-
-            .With(nameof(processedData.YieldToday), processedData.YieldToday)
-            .With(nameof(processedData.YieldTotal), processedData.YieldTotal)
-
-            .With(nameof(processedData.InverterPower), processedData.InverterPower)
-            .With(nameof(processedData.CurrentHousePower), processedData.CurrentHousePower);
+        var fields = _monitoringDataAccess.Create(processedData.CreatedAt);
+        foreach (var item in toSave.Data)
+        {
+            if (item.Changed || item.ChangedInterval >= _minDataInterval)
+            {
+                fields.With(item);
+            }
+        }
 
         await _monitoringDataAccess.WritePointAsync(fields);
+        _lastContainer = processedData;
     }
 
     public bool IsInit { get; private set; }
@@ -127,48 +107,49 @@ public class SolaxX3G4JobTask : IJobTask
         _realTimeBody.Add(PwdBodyParam, _pass);
     }
 
-    private SolaxX3G4Data Process(SolaxInvertedRawData data, DateTime time)
+    private MeasureContainer Process(SolaxInvertedRawData data, DateTime time)
     {
-        return new SolaxX3G4Data
-        {
-            Time = time,
-            Version = data.Version,
-            SerialNumber = data.SerialNumber,
-            Grid1Voltage = data.Data.ToDecimal(0, 1) ?? 0.0M,
-            Grid2Voltage = data.Data.ToDecimal(1, 1) ?? 0.0M,
-            Grid3Voltage = data.Data.ToDecimal(2, 1) ?? 0.0M,
+        var result = new MeasureContainer(time);
 
-            Grid1Current = data.Data.ToDecimal(3, 1, true) ?? 0.0M,
-            Grid2Current = data.Data.ToDecimal(4, 1, true) ?? 0.0M,
-            Grid3Current = data.Data.ToDecimal(5, 1, true) ?? 0.0M,
+        result.Add(SolaxConstants.Attributes.Version, data.Version);
+        result.Add(SolaxConstants.Attributes.SerialNumber, data.SerialNumber);
 
-            Grid1Power = data.Data.ToInt(6, true) ?? 0,
-            Grid2Power = data.Data.ToInt(7, true) ?? 0,
-            Grid3Power = data.Data.ToInt(8, true) ?? 0,
+        result.Add(SolaxConstants.Attributes.Grid1Voltage, data.Data.ToDecimal(0, 1) ?? 0.0M);
+        result.Add(SolaxConstants.Attributes.Grid2Voltage, data.Data.ToDecimal(1, 1) ?? 0.0M);
+        result.Add(SolaxConstants.Attributes.Grid3Voltage, data.Data.ToDecimal(2, 1) ?? 0.0M);
 
-            InverterPower = data.Data.ToInt(9, true),
-            CurrentHousePower = data.Data.ToInt(47),
+        result.Add(SolaxConstants.Attributes.Grid1Current, data.Data.ToDecimal(3, 1, true) ?? 0.0M);
+        result.Add(SolaxConstants.Attributes.Grid2Current, data.Data.ToDecimal(4, 1, true) ?? 0.0M);
+        result.Add(SolaxConstants.Attributes.Grid3Current, data.Data.ToDecimal(5, 1, true) ?? 0.0M);
 
-            Grid1Frequency = data.Data.ToDecimal(16, 2),
-            Grid2Frequency = data.Data.ToDecimal(17, 2),
-            Grid3Frequency = data.Data.ToDecimal(18, 2),
+        result.Add(SolaxConstants.Attributes.Grid1Power, data.Data.ToInt(6, true) ?? 0);
+        result.Add(SolaxConstants.Attributes.Grid2Power, data.Data.ToInt(7, true) ?? 0);
+        result.Add(SolaxConstants.Attributes.Grid3Power, data.Data.ToInt(8, true) ?? 0);
 
+        result.Add(SolaxConstants.Attributes.InverterPower, data.Data.ToInt(9, true));
+        result.Add(SolaxConstants.Attributes.CurrentHousePower, data.Data.ToInt(47, true));
 
-            PowerPv1 = data.Data.ToInt(14) ?? 0,
-            PowerPv2 = data.Data.ToInt(15) ?? 0,
+        result.Add(SolaxConstants.Attributes.Grid1Frequency, data.Data.ToDecimal(16, 2));
+        result.Add(SolaxConstants.Attributes.Grid2Frequency, data.Data.ToDecimal(17, 2));
+        result.Add(SolaxConstants.Attributes.Grid3Frequency, data.Data.ToDecimal(18, 2));
 
-            FeedInPower = (data.Data.ToAccumulatedInt(34,35) ?? 0).ToSigned32(),
-            FeedInEnergy = (data.Data.ToAccumulatedInt(86,87) ?? 0).ToDecimal(2) ?? 0.0m,
-            ConsumedEnergy = (data.Data.ToAccumulatedInt(88,89)?? 0).ToDecimal(2) ?? 0.0m,
+        result.Add(SolaxConstants.Attributes.PowerPv1, data.Data.ToInt(14) ?? 0);
+        result.Add(SolaxConstants.Attributes.PowerPv2, data.Data.ToInt(15) ?? 0);
 
-            YieldTotal = (data.Data.ToAccumulatedInt(68,69) ?? 0).ToDecimal(1) ?? 0.0M,
-            YieldToday = data.Data.ToDecimal(70,1) ?? 0.0m,
+        result.Add(SolaxConstants.Attributes.FeedInPower, (data.Data.ToAccumulatedInt(34,35) ?? 0).ToSigned32());
+        result.Add(SolaxConstants.Attributes.FeedInEnergy, (data.Data.ToAccumulatedInt(86,87) ?? 0).ToDecimal(2) ?? 0.0m);
+        result.Add(SolaxConstants.Attributes.ConsumedEnergy, (data.Data.ToAccumulatedInt(88,89)?? 0).ToDecimal(2) ?? 0.0m);
 
-            RadiatorTemperature = data.Data.ToInt(54, true),
+        result.Add(SolaxConstants.Attributes.YieldTotal, (data.Data.ToAccumulatedInt(68,69) ?? 0).ToDecimal(1) ?? 0.0M);
+        result.Add(SolaxConstants.Attributes.YieldToday, data.Data.ToDecimal(70,1) ?? 0.0m);
 
-            BatteryCapacity = data.Data.ToInt(103),
-            BatteryTemperature = data.Data.ToInt(105, true),
-            BatteryPower = data.Data.ToInt(41, true)
-        };
+        result.Add(SolaxConstants.Attributes.RadiatorTemperature, data.Data.ToInt(54, true));
+
+        result.Add(SolaxConstants.Attributes.BatteryCapacity, data.Data.ToInt(103));
+        result.Add(SolaxConstants.Attributes.BatteryTemperature, data.Data.ToInt(105, true));
+        result.Add(SolaxConstants.Attributes.BatteryPower, data.Data.ToInt(41, true));
+
+        return result;
     }
+
 }
