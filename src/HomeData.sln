@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Tasks.Manager", "H
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Tasks.Solax", "HomeData.Tasks.Solax\HomeData.Tasks.Solax.csproj", "{705A87FC-290C-4578-A76D-4E412C7AE646}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Test", "HomeData.Test\HomeData.Test.csproj", "{2D527D60-BEEF-4678-A735-AA8F7E6AE12F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,5 +43,9 @@ Global
 		{705A87FC-290C-4578-A76D-4E412C7AE646}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{705A87FC-290C-4578-A76D-4E412C7AE646}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{705A87FC-290C-4578-A76D-4E412C7AE646}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D527D60-BEEF-4678-A735-AA8F7E6AE12F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D527D60-BEEF-4678-A735-AA8F7E6AE12F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D527D60-BEEF-4678-A735-AA8F7E6AE12F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D527D60-BEEF-4678-A735-AA8F7E6AE12F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

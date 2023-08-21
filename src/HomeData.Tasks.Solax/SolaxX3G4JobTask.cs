@@ -72,7 +72,7 @@ public class SolaxX3G4JobTask : IJobTask
     {
         MeasureContainer toSave = _lastContainer == null ? processedData : _lastContainer.Merge(processedData);
 
-        var fields = _monitoringDataAccess.Create(processedData.CreatedAt);
+        var fields = _monitoringDataAccess.Create(processedData.Time);
         foreach (var item in toSave.Data)
         {
             if (item.Changed || item.ChangedInterval >= _minDataInterval)
@@ -148,6 +148,9 @@ public class SolaxX3G4JobTask : IJobTask
         result.Add(SolaxConstants.Attributes.BatteryCapacity, data.Data.ToInt(103));
         result.Add(SolaxConstants.Attributes.BatteryTemperature, data.Data.ToInt(105, true));
         result.Add(SolaxConstants.Attributes.BatteryPower, data.Data.ToInt(41, true));
+
+        result.Add(SolaxConstants.Attributes.TodayGridInEnergy, data.Data.ToDecimal(92, 2));
+        result.Add(SolaxConstants.Attributes.TodayGridOutEnergy, data.Data.ToDecimal(90, 2));
 
         return result;
     }

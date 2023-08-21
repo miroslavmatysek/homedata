@@ -3,11 +3,11 @@ namespace HomeData.Model;
 public class MeasureContainer
 {
     private readonly Dictionary<string, MeasureItem> _data;
-    public DateTime CreatedAt { get; }
+    public DateTime Time { get; }
 
-    public MeasureContainer(DateTime createdAt)
+    public MeasureContainer(DateTime time)
     {
-        CreatedAt = createdAt;
+        Time = time;
         _data = new Dictionary<string, MeasureItem>();
     }
 
@@ -15,8 +15,8 @@ public class MeasureContainer
     {
         _data.Add(field, new MeasureItem(field)
         {
-            DateTime = CreatedAt,
-            LastChanged = lastChanged ?? CreatedAt,
+            DateTime = Time,
+            LastChanged = lastChanged ?? Time,
             Changed = changed,
             Value = value
         });
@@ -29,12 +29,17 @@ public class MeasureContainer
 
     public MeasureContainer Merge(MeasureContainer mc)
     {
-        var result = new MeasureContainer(mc.CreatedAt);
+        var result = new MeasureContainer(mc.Time);
 
         foreach (var item in mc._data)
         {
-            var equals = !(_data.TryGetValue(item.Key, out var old) && Compare(old, item.Value));
-            result.Add(item.Key, item.Value, !equals, equals ? old?.LastChanged : null);
+            if (_data.TryGetValue(item.Key, out var old))
+            {
+                var equals = Compare(old, item.Value);
+                result.Add(item.Key, item.Value, !equals, equals ? old.LastChanged : null);
+            }
+            else
+                result.Add(item.Key, item.Value, true);
         }
 
         return result;
@@ -52,7 +57,7 @@ public class MeasureContainer
 
         if (result)
         {
-            newItem.LastChanged = newItem.LastChanged;
+            newItem.LastChanged = oldItem.LastChanged;
         }
 
         return result;

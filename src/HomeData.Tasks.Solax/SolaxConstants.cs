@@ -42,5 +42,8 @@ public static class SolaxConstants
         public const string BatteryTemperature = "BatteryTemperature";
         public const string BatteryPower = "BatteryPower";
 
+        public const string TodayGridInEnergy = "TodayGridInEnergy";
+        public const string TodayGridOutEnergy = "TodayGridOutEnergy";
+
     }
 }
