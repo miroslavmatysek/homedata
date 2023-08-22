@@ -5,6 +5,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Items", "Items", "{E5D42C86-F591-480D-90E0-C4F3A1619A85}"
 	ProjectSection(SolutionItems) = preProject
 		..\README.md = ..\README.md
+		..\grafana\solax_dashboardjson = ..\grafana\solax_dashboardjson
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData", "HomeData\HomeData.csproj", "{60157781-399D-4A61-BD4D-BA535F9B243B}"
