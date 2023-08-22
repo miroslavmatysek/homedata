@@ -11,4 +11,6 @@ public interface IMeasurementFieldContainer
     IMeasurementFieldContainer With(string name, decimal? value);
 
     IMeasurementFieldContainer With(MeasureItem item);
+
+    int Count { get; }
 }

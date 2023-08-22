@@ -63,7 +63,7 @@ public class QuartzTaskManager : ITaskManager
 
     private async Task AddJob<T>(TaskConfig tc) where T : IJobTask
     {
-        var id = nameof(T);
+        var id = typeof(T).Name;
         ITrigger trigger = TriggerBuilder.Create()
             .WithIdentity(id, DefaultGroup)
             .StartNow()
@@ -77,6 +77,7 @@ public class QuartzTaskManager : ITaskManager
             .Build();
 
         await _scheduler.ScheduleJob(job, trigger);
+        _logger.LogInformation("Task: {Task} was created and scheduled [Interval: {Interval}]", id, tc.Interval);
     }
 
     public async Task StopAsync()

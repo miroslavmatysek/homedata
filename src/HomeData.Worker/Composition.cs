@@ -1,3 +1,4 @@
+using System.Reflection;
 using DryIoc;
 using HomeData.DataAccess;
 using HomeData.DataAccess.Influxdb;
@@ -18,6 +19,10 @@ public static class Composition
     public static Container AddNLog(this Container container)
     {
         LogManager.Setup().LoadConfigurationFromFile("nlog.config");
+
+        LogManager.AddHiddenAssembly(Assembly.Load(new AssemblyName("Microsoft.Extensions.Logging")));
+        LogManager.AddHiddenAssembly(Assembly.Load(new AssemblyName("Microsoft.Extensions.Logging.Abstractions")));
+        LogManager.AddHiddenAssembly(Assembly.Load(new AssemblyName("NLog.Extensions.Logging")));
 
         var loggerProvider =
             new NLogLoggerProvider(new NLogProviderOptions(), LogManager.LogFactory);
