@@ -155,6 +155,9 @@ public class SolaxX3G4JobTask : IJobTask
         result.Add(SolaxConstants.Attributes.TodayGridInEnergy, data.Data.ToDecimal(92, 2));
         result.Add(SolaxConstants.Attributes.TodayGridOutEnergy, data.Data.ToDecimal(90, 2));
 
+        result.Add(SolaxConstants.Attributes.EnergyToday, data.Data.ToDecimal(82, 1));
+        result.Add(SolaxConstants.Attributes.EnergyInclBatteryToday, data.Data.ToDecimal(70, 1));
+
         result.Add(SolaxConstants.Attributes.BatteryOperationMode, ToBatteryOperationMode(data.Data.ToInt(168)));
         result.Add(SolaxConstants.Attributes.InverterOperationMode, ToInverterOperationMode(data.Data.ToInt(19)));
 

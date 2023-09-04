@@ -47,6 +47,9 @@ public static class SolaxConstants
 
         public const string BatteryOperationMode = "BatteryOperationMode";
         public const string InverterOperationMode = "InverterOperationMode";
+
+        public const string EnergyToday = " EnergyToday";
+        public const string EnergyInclBatteryToday = "EnergyInclBatteryToday";
     }
 
     public static class BatteryOperationModes
