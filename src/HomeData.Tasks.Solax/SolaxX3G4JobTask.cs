@@ -20,7 +20,7 @@ public class SolaxX3G4JobTask : IJobTask
 
     private readonly HttpClient _httpClient;
     private readonly Dictionary<string, string> _realTimeBody;
-    private readonly TimeSpan _minDataInterval  = TimeSpan.FromSeconds(60);
+    private readonly TimeSpan _minDataInterval = TimeSpan.FromSeconds(60);
     private ILogger _logger;
     private IMonitoringDataAccess _monitoringDataAccess;
 
@@ -136,12 +136,15 @@ public class SolaxX3G4JobTask : IJobTask
         result.Add(SolaxConstants.Attributes.PowerPv1, data.Data.ToInt(14) ?? 0);
         result.Add(SolaxConstants.Attributes.PowerPv2, data.Data.ToInt(15) ?? 0);
 
-        result.Add(SolaxConstants.Attributes.FeedInPower, (data.Data.ToAccumulatedInt(34,35) ?? 0).ToSigned32());
-        result.Add(SolaxConstants.Attributes.FeedInEnergy, (data.Data.ToAccumulatedInt(86,87) ?? 0).ToDecimal(2) ?? 0.0m);
-        result.Add(SolaxConstants.Attributes.ConsumedEnergy, (data.Data.ToAccumulatedInt(88,89)?? 0).ToDecimal(2) ?? 0.0m);
+        result.Add(SolaxConstants.Attributes.FeedInPower, (data.Data.ToAccumulatedInt(34, 35) ?? 0).ToSigned32());
+        result.Add(SolaxConstants.Attributes.FeedInEnergy,
+            (data.Data.ToAccumulatedInt(86, 87) ?? 0).ToDecimal(2) ?? 0.0m);
+        result.Add(SolaxConstants.Attributes.ConsumedEnergy,
+            (data.Data.ToAccumulatedInt(88, 89) ?? 0).ToDecimal(2) ?? 0.0m);
 
-        result.Add(SolaxConstants.Attributes.YieldTotal, (data.Data.ToAccumulatedInt(68,69) ?? 0).ToDecimal(1) ?? 0.0M);
-        result.Add(SolaxConstants.Attributes.YieldToday, data.Data.ToDecimal(70,1) ?? 0.0m);
+        result.Add(SolaxConstants.Attributes.YieldTotal,
+            (data.Data.ToAccumulatedInt(68, 69) ?? 0).ToDecimal(1) ?? 0.0M);
+        result.Add(SolaxConstants.Attributes.YieldToday, data.Data.ToDecimal(70, 1) ?? 0.0m);
 
         result.Add(SolaxConstants.Attributes.RadiatorTemperature, data.Data.ToInt(54, true));
 
@@ -152,7 +155,45 @@ public class SolaxX3G4JobTask : IJobTask
         result.Add(SolaxConstants.Attributes.TodayGridInEnergy, data.Data.ToDecimal(92, 2));
         result.Add(SolaxConstants.Attributes.TodayGridOutEnergy, data.Data.ToDecimal(90, 2));
 
+        result.Add(SolaxConstants.Attributes.BatteryOperationMode, ToBatteryOperationMode(data.Data.ToInt(168)));
+        result.Add(SolaxConstants.Attributes.InverterOperationMode, ToInverterOperationMode(data.Data.ToInt(19)));
+
         return result;
     }
 
+    private static string ToBatteryOperationMode(int? value)
+    {
+        if (value == null)
+            return SolaxConstants.BatteryOperationModes.Unknown;
+
+        return value switch
+        {
+            0 => SolaxConstants.BatteryOperationModes.SelfUseMode,
+            1 => SolaxConstants.BatteryOperationModes.ForceTimeUse,
+            2 => SolaxConstants.BatteryOperationModes.BackUpMode,
+            4 => SolaxConstants.BatteryOperationModes.FeedInPriority,
+            _ => SolaxConstants.BatteryOperationModes.Unknown
+        };
+    }
+
+    private static string ToInverterOperationMode(int? value)
+    {
+        if (value == null)
+            return SolaxConstants.InverterOperationModes.Unknown;
+        return value switch
+        {
+            0 => SolaxConstants.InverterOperationModes.Waiting,
+            1 => SolaxConstants.InverterOperationModes.Checking,
+            2 => SolaxConstants.InverterOperationModes.Normal,
+            3 => SolaxConstants.InverterOperationModes.Off,
+            4 => SolaxConstants.InverterOperationModes.PermanentFault,
+            5 => SolaxConstants.InverterOperationModes.Updating,
+            6 => SolaxConstants.InverterOperationModes.EpsCheck,
+            7 => SolaxConstants.InverterOperationModes.EpsMode,
+            8 => SolaxConstants.InverterOperationModes.SelfTest,
+            9 => SolaxConstants.InverterOperationModes.Idle,
+            10 => SolaxConstants.InverterOperationModes.Standby,
+            _ => SolaxConstants.InverterOperationModes.Unknown
+        };
+    }
 }

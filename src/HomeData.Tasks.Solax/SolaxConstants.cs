@@ -45,5 +45,32 @@ public static class SolaxConstants
         public const string TodayGridInEnergy = "TodayGridInEnergy";
         public const string TodayGridOutEnergy = "TodayGridOutEnergy";
 
+        public const string BatteryOperationMode = "BatteryOperationMode";
+        public const string InverterOperationMode = "InverterOperationMode";
+    }
+
+    public static class BatteryOperationModes
+    {
+        public const string SelfUseMode = "Self use mode";
+        public const string ForceTimeUse = "Force time use";
+        public const string BackUpMode = "Back up mode";
+        public const string FeedInPriority = "Feed in priority";
+        public const string Unknown = "Unknown";
+    }
+
+    public static class InverterOperationModes
+    {
+        public const string Waiting = "Waiting";
+        public const string Unknown = "Unknown";
+        public const string Checking = "Checking";
+        public const string Normal = "Normal";
+        public const string Off = "Off";
+        public const string PermanentFault = "Permanent Fault";
+        public const string Updating = "Updating";
+        public const string EpsCheck = "EPS check";
+        public const string EpsMode = "EPS mode";
+        public const string SelfTest = "Self test";
+        public const string Idle = " Idle";
+        public const string Standby = "Standby";
     }
 }
