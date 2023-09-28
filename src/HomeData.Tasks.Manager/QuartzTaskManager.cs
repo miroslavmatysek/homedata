@@ -1,5 +1,6 @@
 using HomeData.Model.Config;
 using HomeData.Tasks.Solax;
+using HomeData.Tasks.Usb;
 using Microsoft.Extensions.Logging;
 using Quartz;
 using Quartz.Spi;
@@ -53,6 +54,9 @@ public class QuartzTaskManager : ITaskManager
             {
                 case "solaxx3g4":
                     await AddJob<SolaxX3G4JobTask>(item);
+                    break;
+                case "usbserialtext":
+                    await AddJob<UsbSerialTextJobTask>(item);
                     break;
                 default:
                     _logger.LogWarning("Task: {Name} is not supported", item.Name);

@@ -1,5 +1,6 @@
 namespace HomeData.Model.Config;
 
+[Serializable]
 public class TaskConfig
 {
     public string Name { get; set; }
@@ -10,5 +11,5 @@ public class TaskConfig
 
     public TimeSpan Interval { get; set; }
 
-    public Dictionary<string, string> Params { get; set; } = new Dictionary<string, string>();
+    public Dictionary<string, string> Params { get; set; } = new();
 }

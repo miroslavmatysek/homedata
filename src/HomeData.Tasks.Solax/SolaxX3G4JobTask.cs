@@ -2,6 +2,7 @@ using HomeData.DataAccess;
 using HomeData.Model;
 using HomeData.Tasks.Solax.Extensions;
 using HomeData.Tasks.Solax.Model;
+using HomeData.Util;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Quartz;
@@ -93,15 +94,15 @@ public class SolaxX3G4JobTask : IJobTask
         _logger = logger;
         _monitoringDataAccess = monitoringDataAccess;
 
-        if (!taskParams.ContainsKey(HostParamName) || string.IsNullOrEmpty(taskParams[HostParamName]))
+        _ipAddress = taskParams.GetOrDefaultString(HostParamName, string.Empty);
+        if (string.IsNullOrEmpty(_ipAddress))
             throw new ArgumentNullException(
                 $"Task: {nameof(SolaxX3G4JobTask)} - wrong config - config param: {HostParamName} missing");
-        _ipAddress = taskParams[HostParamName];
 
-        if (!taskParams.ContainsKey(PasswordParamName) || string.IsNullOrEmpty(taskParams[PasswordParamName]))
+        _pass = taskParams.GetOrDefaultString(PasswordParamName, string.Empty);
+        if (!taskParams.ContainsKey(PasswordParamName) || string.IsNullOrEmpty(_pass))
             throw new ArgumentNullException(
                 $"Task: {nameof(SolaxX3G4JobTask)} - wrong config - config param: {PasswordParamName} missing");
-        _pass = taskParams[PasswordParamName];
 
         _url = string.Format(RequestPath, _ipAddress);
         _realTimeBody.Add(PwdBodyParam, _pass);
