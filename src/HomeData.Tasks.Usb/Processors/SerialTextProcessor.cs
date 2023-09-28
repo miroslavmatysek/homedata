@@ -49,13 +49,13 @@ public class SerialTextProcessor : ISerialTextProcessor
 
             if (data != null && data.Length > 0)
             {
-                MeasureContainer result = new MeasureContainer(DateTime.Now);
+                var result = new MeasureContainer(DateTime.Now);
                 foreach (var item in data)
                 {
                     var itemData = JsonConvert.DeserializeObject<Dictionary<string, double>>(item);
                     foreach (var valueData in itemData)
                     {
-                        result.Add(valueData.Key, valueData.Value);
+                        result.AddOrUpdate(valueData.Key, valueData.Value);
                     }
                 }
                 _logger.LogDebug("Processed data from USB");

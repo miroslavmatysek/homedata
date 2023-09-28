@@ -73,7 +73,7 @@ public class UsbSerialTextService : IUsbSerialTextService
             {
                 if (data.StartsWith("data:"))
                 {
-                    var cleanData = data.Replace("json:", "").Replace("|", "\"");
+                    var cleanData = data.Replace("data:", "").Replace("|", "\"");
 
                     AddResult(cleanData);
                 }

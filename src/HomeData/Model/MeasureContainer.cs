@@ -13,13 +13,23 @@ public class MeasureContainer
 
     public void Add(string field, object? value, bool changed = false, DateTime? lastChanged = null)
     {
-        _data.Add(field, new MeasureItem(field)
+        _data.Add(field, Create(field, value, changed, lastChanged));
+    }
+
+    public void AddOrUpdate(string field, object value, bool changed = false, DateTime? lastChanged = null)
+    {
+        _data[field] = Create(field, value, changed, lastChanged);
+    }
+
+    private MeasureItem Create(string field, object value, bool changed = false, DateTime? lastChanged = null)
+    {
+        return new MeasureItem(field)
         {
             DateTime = Time,
             LastChanged = lastChanged ?? Time,
             Changed = changed,
             ItemValue = value
-        });
+        };
     }
 
     public List<MeasureItem> Data
