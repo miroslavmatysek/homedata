@@ -32,8 +32,8 @@ public class MeasureContainerTest
         var sut1 = new MeasureContainer(time.AddSeconds(-2));
 
         var sut2 = new MeasureContainer(time);
-        sut2.Add(Item1, "1");
-        sut2.Add(Item2, "2");
+        sut2.AddString(Item1, "1");
+        sut2.AddString(Item2, "2");
 
         // Act.
         var result = sut1.Merge(sut2);
@@ -51,8 +51,8 @@ public class MeasureContainerTest
         // Arrange.
         var time = DateTime.Now;
         var sut1 = new MeasureContainer(time.AddSeconds(-2));
-        sut1.Add(Item1, "1");
-        sut1.Add(Item2, "2");
+        sut1.AddString(Item1, "1");
+        sut1.AddString(Item2, "2");
         var sut2 = new MeasureContainer(time);
 
         // Act.
@@ -69,12 +69,12 @@ public class MeasureContainerTest
         // Arrange.
         var time = DateTime.Now;
         var sut1 = new MeasureContainer(time.AddSeconds(-2));
-        sut1.Add(Item1, "1");
-        sut1.Add(Item2, "2");
+        sut1.AddString(Item1, "1");
+        sut1.AddString(Item2, "2");
 
         var sut2 = new MeasureContainer(time);
-        sut2.Add(Item1, "1");
-        sut2.Add(Item2, "2");
+        sut2.AddString(Item1, "1");
+        sut2.AddString(Item2, "2");
 
         // Act.
         var result = sut1.Merge(sut2);
@@ -94,12 +94,12 @@ public class MeasureContainerTest
         // Arrange.
         var time = DateTime.Now;
         var sut1 = new MeasureContainer(time.AddSeconds(-2));
-        sut1.Add(Item1, "1");
-        sut1.Add(Item2, "2");
+        sut1.AddString(Item1, "1");
+        sut1.AddString(Item2, "2");
 
         var sut2 = new MeasureContainer(time);
-        sut2.Add(Item1, "1");
-        sut2.Add(Item2, "22");
+        sut2.AddString(Item1, "1");
+        sut2.AddString(Item2, "22");
 
         // Act.
         var result = sut1.Merge(sut2);

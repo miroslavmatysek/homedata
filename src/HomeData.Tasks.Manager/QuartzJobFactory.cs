@@ -1,6 +1,7 @@
 using DryIoc;
 using HomeData.DataAccess;
 using HomeData.Model.Config;
+using HomeData.Provider.Common;
 using Microsoft.Extensions.Logging;
 using Quartz;
 using Quartz.Spi;
@@ -30,9 +31,11 @@ public class QuartzJobFactory : IJobFactory, IDisposable
                 throw new ArgumentNullException($"Task: {bundle.JobDetail.JobType.Name} was not configured");
 
             var dataAccessFactory = _container.Resolve<IDataAccessFactory>();
-            jobTask.Init(_container.Resolve<ILogger>(), dataAccessFactory.Create(config.Bucket, config.Measurement), config.Params);
+            jobTask.Init(_container.Resolve<ILogger>(), dataAccessFactory.Create(config.Bucket, config.Measurement),
+                config.Params, config.UtcTime ? new UtcDateTimeProvider() : new LocalTimeProvider());
             return jobTask;
         }
+
         return (IJob)result;
     }
 
