@@ -10,5 +10,7 @@ public class TaskConfig
 
     public TimeSpan Interval { get; set; }
 
+    public bool UtcTime { get; set; } = true;
+
     public Dictionary<string, string> Params { get; set; } = new Dictionary<string, string>();
 }

@@ -1,5 +1,6 @@
 using HomeData.DataAccess;
 using HomeData.Model;
+using HomeData.Provider;
 using HomeData.Tasks.Solax.Extensions;
 using HomeData.Tasks.Solax.Model;
 using Microsoft.Extensions.Logging;
@@ -20,9 +21,11 @@ public class SolaxX3G4JobTask : IJobTask
 
     private readonly HttpClient _httpClient;
     private readonly Dictionary<string, string> _realTimeBody;
+    private readonly Dictionary<string, string> _deltaNameMap;
     private readonly TimeSpan _minDataInterval = TimeSpan.FromSeconds(60);
     private ILogger _logger;
     private IMonitoringDataAccess _monitoringDataAccess;
+    private ITimeProvider _timeProvider;
 
 
     private string _ipAddress;
@@ -34,8 +37,9 @@ public class SolaxX3G4JobTask : IJobTask
     {
         _httpClient = new HttpClient();
         _realTimeBody = new Dictionary<string, string>();
+        _deltaNameMap = new Dictionary<string, string>();
         _realTimeBody.Add(OptTypeBodyParam, RealTimeOptValue);
-        _lastContainer = new MeasureContainer(DateTime.Now);
+        _lastContainer = null;
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -51,10 +55,11 @@ public class SolaxX3G4JobTask : IJobTask
                 {
                     if (response.IsSuccessStatusCode)
                     {
-                        var now = DateTime.Now;
+                        var now = _timeProvider.GetNow();
                         var data = await response.Content.ReadAsStringAsync();
                         var rawData = JsonConvert.DeserializeObject<SolaxInvertedRawData>(data);
                         var processedData = Process(rawData, now);
+                        processedData = ProcessDelta(processedData);
                         await SaveData(processedData);
                     }
                 }
@@ -68,9 +73,49 @@ public class SolaxX3G4JobTask : IJobTask
         }
     }
 
+    private MeasureContainer ProcessDelta(MeasureContainer processedData)
+    {
+        var aggregateData = processedData.Data.Where(i => i.AggregateType).ToList();
+        if (_lastContainer == null)
+        {
+            foreach (var ai in aggregateData)
+            {
+                var na = ai.CreateSimilar(GetDeltaName(ai.Field));
+                na.SetZero();
+                na.Changed = true;
+                na.Type = MeasureItemType.Delta;
+                processedData.Add(na);
+            }
+        }
+        else
+        {
+            var lastData = _lastContainer.Data.Where(i => i.AggregateType).ToDictionary(i => i.Field, i => i);
+            foreach (var ai in aggregateData)
+            {
+                var na = ai.CreateSimilar(GetDeltaName(ai.Field));
+                na.SetZero();
+                na.Changed = true;
+                na.Type = MeasureItemType.Delta;
+
+                if (lastData.TryGetValue(ai.Field, out var lastItem) && ai.IsGreatOrEquals(lastItem))
+                    na.ItemValue = ai.Subtract(lastItem.ItemValue);
+                processedData.Add(na);
+            }
+        }
+
+        return processedData;
+    }
+
+    private string GetDeltaName(string itemName)
+    {
+        if (!_deltaNameMap.ContainsKey(itemName))
+            _deltaNameMap.Add(itemName, $"{itemName}_delta");
+        return _deltaNameMap[itemName];
+    }
+
     private async Task SaveData(MeasureContainer processedData)
     {
-        MeasureContainer toSave = _lastContainer == null ? processedData : _lastContainer.Merge(processedData);
+        var toSave = _lastContainer == null ? processedData : _lastContainer.Merge(processedData);
 
         var fields = _monitoringDataAccess.Create(processedData.Time);
         foreach (var item in toSave.Data)
@@ -87,11 +132,13 @@ public class SolaxX3G4JobTask : IJobTask
 
     public bool IsInit { get; private set; }
 
-    public void Init(ILogger logger, IMonitoringDataAccess monitoringDataAccess, Dictionary<string, string> taskParams)
+    public void Init(ILogger logger, IMonitoringDataAccess monitoringDataAccess, Dictionary<string, string> taskParams,
+        ITimeProvider timeProvider)
     {
         IsInit = true;
         _logger = logger;
         _monitoringDataAccess = monitoringDataAccess;
+        _timeProvider = timeProvider;
 
         if (!taskParams.ContainsKey(HostParamName) || string.IsNullOrEmpty(taskParams[HostParamName]))
             throw new ArgumentNullException(
@@ -111,54 +158,58 @@ public class SolaxX3G4JobTask : IJobTask
     {
         var result = new MeasureContainer(time);
 
-        result.Add(SolaxConstants.Attributes.Version, data.Version);
-        result.Add(SolaxConstants.Attributes.SerialNumber, data.SerialNumber);
+        result.AddString(SolaxConstants.Attributes.Version, data.Version);
+        result.AddString(SolaxConstants.Attributes.SerialNumber, data.SerialNumber);
 
-        result.Add(SolaxConstants.Attributes.Grid1Voltage, data.Data.ToDecimal(0, 1) ?? 0.0M);
-        result.Add(SolaxConstants.Attributes.Grid2Voltage, data.Data.ToDecimal(1, 1) ?? 0.0M);
-        result.Add(SolaxConstants.Attributes.Grid3Voltage, data.Data.ToDecimal(2, 1) ?? 0.0M);
+        result.AddDecimal(SolaxConstants.Attributes.Grid1Voltage, data.Data.ToDecimal(0, 1) ?? 0.0M);
+        result.AddDecimal(SolaxConstants.Attributes.Grid2Voltage, data.Data.ToDecimal(1, 1) ?? 0.0M);
+        result.AddDecimal(SolaxConstants.Attributes.Grid3Voltage, data.Data.ToDecimal(2, 1) ?? 0.0M);
 
-        result.Add(SolaxConstants.Attributes.Grid1Current, data.Data.ToDecimal(3, 1, true) ?? 0.0M);
-        result.Add(SolaxConstants.Attributes.Grid2Current, data.Data.ToDecimal(4, 1, true) ?? 0.0M);
-        result.Add(SolaxConstants.Attributes.Grid3Current, data.Data.ToDecimal(5, 1, true) ?? 0.0M);
+        result.AddDecimal(SolaxConstants.Attributes.Grid1Current, data.Data.ToDecimal(3, 1, true) ?? 0.0M);
+        result.AddDecimal(SolaxConstants.Attributes.Grid2Current, data.Data.ToDecimal(4, 1, true) ?? 0.0M);
+        result.AddDecimal(SolaxConstants.Attributes.Grid3Current, data.Data.ToDecimal(5, 1, true) ?? 0.0M);
 
-        result.Add(SolaxConstants.Attributes.Grid1Power, data.Data.ToInt(6, true) ?? 0);
-        result.Add(SolaxConstants.Attributes.Grid2Power, data.Data.ToInt(7, true) ?? 0);
-        result.Add(SolaxConstants.Attributes.Grid3Power, data.Data.ToInt(8, true) ?? 0);
+        result.AddInt(SolaxConstants.Attributes.Grid1Power, data.Data.ToInt(6, true) ?? 0);
+        result.AddInt(SolaxConstants.Attributes.Grid2Power, data.Data.ToInt(7, true) ?? 0);
+        result.AddInt(SolaxConstants.Attributes.Grid3Power, data.Data.ToInt(8, true) ?? 0);
 
-        result.Add(SolaxConstants.Attributes.InverterPower, data.Data.ToInt(9, true));
-        result.Add(SolaxConstants.Attributes.CurrentHousePower, data.Data.ToInt(47, true));
+        result.AddInt(SolaxConstants.Attributes.InverterPower, data.Data.ToInt(9, true));
+        result.AddInt(SolaxConstants.Attributes.CurrentHousePower, data.Data.ToInt(47, true));
 
-        result.Add(SolaxConstants.Attributes.Grid1Frequency, data.Data.ToDecimal(16, 2));
-        result.Add(SolaxConstants.Attributes.Grid2Frequency, data.Data.ToDecimal(17, 2));
-        result.Add(SolaxConstants.Attributes.Grid3Frequency, data.Data.ToDecimal(18, 2));
+        result.AddDecimal(SolaxConstants.Attributes.Grid1Frequency, data.Data.ToDecimal(16, 2));
+        result.AddDecimal(SolaxConstants.Attributes.Grid2Frequency, data.Data.ToDecimal(17, 2));
+        result.AddDecimal(SolaxConstants.Attributes.Grid3Frequency, data.Data.ToDecimal(18, 2));
 
-        result.Add(SolaxConstants.Attributes.PowerPv1, data.Data.ToInt(14) ?? 0);
-        result.Add(SolaxConstants.Attributes.PowerPv2, data.Data.ToInt(15) ?? 0);
+        result.AddInt(SolaxConstants.Attributes.PowerPv1, data.Data.ToInt(14) ?? 0);
+        result.AddInt(SolaxConstants.Attributes.PowerPv2, data.Data.ToInt(15) ?? 0);
 
-        result.Add(SolaxConstants.Attributes.FeedInPower, (data.Data.ToAccumulatedInt(34, 35) ?? 0).ToSigned32());
-        result.Add(SolaxConstants.Attributes.FeedInEnergy,
+        result.AddInt64(SolaxConstants.Attributes.FeedInPower, (data.Data.ToAccumulatedInt(34, 35) ?? 0).ToSigned32());
+        result.AddDecimal(SolaxConstants.Attributes.FeedInEnergy,
             (data.Data.ToAccumulatedInt(86, 87) ?? 0).ToDecimal(2) ?? 0.0m);
-        result.Add(SolaxConstants.Attributes.ConsumedEnergy,
-            (data.Data.ToAccumulatedInt(88, 89) ?? 0).ToDecimal(2) ?? 0.0m);
+        result.AddDecimal(SolaxConstants.Attributes.ConsumedEnergy,
+            (data.Data.ToAccumulatedInt(88, 89) ?? 0).ToDecimal(2) ?? 0.0m, type: MeasureItemType.Aggregate);
 
-        result.Add(SolaxConstants.Attributes.YieldTotal,
+        result.AddDecimal(SolaxConstants.Attributes.YieldTotal,
             (data.Data.ToAccumulatedInt(68, 69) ?? 0).ToDecimal(1) ?? 0.0M);
-        result.Add(SolaxConstants.Attributes.YieldToday, data.Data.ToDecimal(70, 1) ?? 0.0m);
+        result.AddDecimal(SolaxConstants.Attributes.YieldToday, data.Data.ToDecimal(70, 1) ?? 0.0m,
+            type: MeasureItemType.Aggregate);
 
-        result.Add(SolaxConstants.Attributes.RadiatorTemperature, data.Data.ToInt(54, true));
+        result.AddInt(SolaxConstants.Attributes.RadiatorTemperature, data.Data.ToInt(54, true));
 
-        result.Add(SolaxConstants.Attributes.BatteryCapacity, data.Data.ToInt(103));
-        result.Add(SolaxConstants.Attributes.BatteryTemperature, data.Data.ToInt(105, true));
-        result.Add(SolaxConstants.Attributes.BatteryPower, data.Data.ToInt(41, true));
+        result.AddInt(SolaxConstants.Attributes.BatteryCapacity, data.Data.ToInt(103));
+        result.AddInt(SolaxConstants.Attributes.BatteryTemperature, data.Data.ToInt(105, true));
+        result.AddInt(SolaxConstants.Attributes.BatteryPower, data.Data.ToInt(41, true));
 
-        result.Add(SolaxConstants.Attributes.TodayGridInEnergy, data.Data.ToDecimal(92, 2));
-        result.Add(SolaxConstants.Attributes.TodayGridOutEnergy, data.Data.ToDecimal(90, 2));
+        result.AddDecimal(SolaxConstants.Attributes.TodayGridInEnergy, data.Data.ToDecimal(92, 2),
+            type: MeasureItemType.Aggregate);
+        result.AddDecimal(SolaxConstants.Attributes.TodayGridOutEnergy, data.Data.ToDecimal(90, 2),
+            type: MeasureItemType.Aggregate);
 
-        result.Add(SolaxConstants.Attributes.EnergyToday, data.Data.ToDecimal(82, 1));
+        result.AddDecimal(SolaxConstants.Attributes.EnergyToday, data.Data.ToDecimal(82, 1),
+            type: MeasureItemType.Aggregate);
 
-        result.Add(SolaxConstants.Attributes.BatteryOperationMode, ToBatteryOperationMode(data.Data.ToInt(168)));
-        result.Add(SolaxConstants.Attributes.InverterOperationMode, ToInverterOperationMode(data.Data.ToInt(19)));
+        result.AddString(SolaxConstants.Attributes.BatteryOperationMode, ToBatteryOperationMode(data.Data.ToInt(168)));
+        result.AddString(SolaxConstants.Attributes.InverterOperationMode, ToInverterOperationMode(data.Data.ToInt(19)));
 
         return result;
     }

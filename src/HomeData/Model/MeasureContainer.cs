@@ -11,14 +11,59 @@ public class MeasureContainer
         _data = new Dictionary<string, MeasureItem>();
     }
 
-    public void Add(string field, object? value, bool changed = false, DateTime? lastChanged = null)
+    public void AddDecimal(string field, decimal? value, bool changed = false, DateTime? lastChanged = null,
+        MeasureItemType type = MeasureItemType.Value)
     {
-        _data.Add(field, new MeasureItem(field)
+        Add(new DecimalMeasureItem(field)
         {
             DateTime = Time,
             LastChanged = lastChanged ?? Time,
             Changed = changed,
-            ItemValue = value
+            ItemValue = value,
+            Type = type
+        });
+    }
+
+    public void AddInt(string field, int? value, bool changed = false, DateTime? lastChanged = null,
+        MeasureItemType type = MeasureItemType.Value)
+    {
+        Add(new IntMeasureItem(field)
+        {
+            DateTime = Time,
+            LastChanged = lastChanged ?? Time,
+            Changed = changed,
+            ItemValue = value,
+            Type = type
+        });
+    }
+
+    public void AddInt64(string field, long? value, bool changed = false, DateTime? lastChanged = null,
+        MeasureItemType type = MeasureItemType.Value)
+    {
+        Add(new LongMeasureItem(field)
+        {
+            DateTime = Time,
+            LastChanged = lastChanged ?? Time,
+            Changed = changed,
+            ItemValue = value,
+            Type = type
+        });
+    }
+
+    public void Add(MeasureItem item)
+    {
+        _data.Add(item.Field, item);
+    }
+
+    public void AddString(string field, string? value, bool changed = false, DateTime? lastChanged = null)
+    {
+        Add(new LongMeasureItem(field)
+        {
+            DateTime = Time,
+            LastChanged = lastChanged ?? Time,
+            Changed = changed,
+            ItemValue = value,
+            Type = MeasureItemType.Value
         });
     }
 
@@ -33,34 +78,25 @@ public class MeasureContainer
 
         foreach (var item in mc._data)
         {
+            var newItem = item.Value.CreateSimilar(item.Key);
+            newItem.ItemValue = item.Value.ItemValue;
+            newItem.Type = item.Value.Type;
+            newItem.Changed = true;
+            newItem.DateTime = item.Value.DateTime;
+
             if (_data.TryGetValue(item.Key, out var old))
             {
-                var equals = Compare(old, item.Value);
-                result.Add(item.Key, item.Value.ItemValue, !equals, equals ? old.LastChanged : null);
+                newItem.Changed = !old.CompareValue(item.Value);
+                if (!newItem.Changed)
+                {
+                    item.Value.LastChanged = old.LastChanged;
+                    newItem.LastChanged = old.LastChanged;
+                }
             }
-            else
-                result.Add(item.Key, item.Value.ItemValue, true);
+
+            result.Add(newItem);
         }
 
         return result;
-    }
-
-    private static bool Compare(MeasureItem oldItem, MeasureItem newItem)
-    {
-        var result = false;
-        if (oldItem.ItemValue == null && newItem.ItemValue == null)
-            result = true;
-        else if (oldItem.ItemValue == null || newItem.ItemValue == null)
-            result = false;
-        else if (oldItem.ItemValue.Equals(newItem.ItemValue))
-            result = true;
-
-        if (result)
-        {
-            newItem.LastChanged = oldItem.LastChanged;
-        }
-
-        return result;
-
     }
 }
