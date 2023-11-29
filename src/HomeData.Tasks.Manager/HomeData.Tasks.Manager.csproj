@@ -11,6 +11,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\HomeData.Tasks.Solax\HomeData.Tasks.Solax.csproj" />
+      <ProjectReference Include="..\HomeData.Tasks.Usb\HomeData.Tasks.Usb.csproj" />
       <ProjectReference Include="..\HomeData\HomeData.csproj" />
     </ItemGroup>
 

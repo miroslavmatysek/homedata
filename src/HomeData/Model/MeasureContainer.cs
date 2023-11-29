@@ -55,6 +55,11 @@ public class MeasureContainer
         _data.Add(item.Field, item);
     }
 
+    public void AddOrUpdate(MeasureItem item)
+    {
+        _data[item.Field] = item;
+    }
+
     public void AddString(string field, string? value, bool changed = false, DateTime? lastChanged = null)
     {
         Add(new LongMeasureItem(field)

@@ -1,4 +1,5 @@
 using HomeData.DataAccess;
+using HomeData.Model.Config;
 using HomeData.Provider;
 using Microsoft.Extensions.Logging;
 using Quartz;
@@ -9,5 +10,5 @@ public interface IJobTask : IJob
 {
     bool IsInit { get; }
 
-    void Init(ILogger logger, IMonitoringDataAccess da, Dictionary<string, string> taskParams, ITimeProvider timeProvider);
+    void Init(ILogger logger, IMonitoringDataAccess da, TaskConfig config, ITimeProvider timeProvider);
 }

@@ -18,6 +18,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Tasks.Solax", "Hom
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Test", "HomeData.Test\HomeData.Test.csproj", "{2D527D60-BEEF-4678-A735-AA8F7E6AE12F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Tasks.Usb", "HomeData.Tasks.Usb\HomeData.Tasks.Usb.csproj", "{D7062C8B-4B67-46F6-9BC8-8FE4D946911D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Service", "HomeData.Service\HomeData.Service.csproj", "{95E4E77C-CFBC-4812-A1D4-512E28719299}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +52,13 @@ Global
 		{2D527D60-BEEF-4678-A735-AA8F7E6AE12F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D527D60-BEEF-4678-A735-AA8F7E6AE12F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D527D60-BEEF-4678-A735-AA8F7E6AE12F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7062C8B-4B67-46F6-9BC8-8FE4D946911D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7062C8B-4B67-46F6-9BC8-8FE4D946911D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7062C8B-4B67-46F6-9BC8-8FE4D946911D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7062C8B-4B67-46F6-9BC8-8FE4D946911D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95E4E77C-CFBC-4812-A1D4-512E28719299}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95E4E77C-CFBC-4812-A1D4-512E28719299}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95E4E77C-CFBC-4812-A1D4-512E28719299}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95E4E77C-CFBC-4812-A1D4-512E28719299}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
