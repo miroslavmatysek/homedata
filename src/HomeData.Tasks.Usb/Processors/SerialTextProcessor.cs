@@ -1,4 +1,5 @@
 using HomeData.Model;
+using HomeData.Provider;
 using HomeData.Service;
 using HomeData.Tasks.Usb.Model;
 using HomeData.Tasks.Usb.Service;
@@ -14,6 +15,7 @@ public class SerialTextProcessor : ISerialTextProcessor
 
     private IUsbSerialTextService _usbSerialTextService;
     private UsbSerialTextTaskSetup _setup;
+    private ITimeProvider _timeProvider;
 
     public SerialTextProcessor(ILogger<SerialTextProcessor> logger, ITaskServiceProvider taskServiceProvider)
     {
@@ -21,7 +23,7 @@ public class SerialTextProcessor : ISerialTextProcessor
         _taskServiceProvider = taskServiceProvider;
     }
 
-    public void Init(UsbSerialTextTaskSetup setup)
+    public void Init(UsbSerialTextTaskSetup setup, ITimeProvider timeProvider)
     {
         if (IsInit)
         {
@@ -29,6 +31,7 @@ public class SerialTextProcessor : ISerialTextProcessor
         }
 
         _setup = setup;
+        _timeProvider = timeProvider;
         _usbSerialTextService = _taskServiceProvider.Get<IUsbSerialTextService>(_setup);
         _usbSerialTextService.Start();
     }
@@ -49,13 +52,20 @@ public class SerialTextProcessor : ISerialTextProcessor
 
             if (data != null && data.Length > 0)
             {
-                var result = new MeasureContainer(DateTime.Now);
+                var result = new MeasureContainer(_timeProvider.GetNow());
                 foreach (var item in data)
                 {
                     var itemData = JsonConvert.DeserializeObject<Dictionary<string, double>>(item);
                     foreach (var valueData in itemData)
                     {
-                        result.AddOrUpdate(valueData.Key, valueData.Value);
+                        result.AddOrUpdate(new DecimalMeasureItem(valueData.Key)
+                        {
+                            DateTime = result.Time,
+                            LastChanged = result.Time,
+                            ItemValue = Convert.ToDecimal(valueData.Value),
+                            Changed = true,
+                            Type = MeasureItemType.Value
+                        });
                     }
                 }
                 _logger.LogDebug("Processed data from USB");

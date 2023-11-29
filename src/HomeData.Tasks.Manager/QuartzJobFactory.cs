@@ -21,22 +21,21 @@ public class QuartzJobFactory : IJobFactory, IDisposable
 
     public IJob NewJob(TriggerFiredBundle bundle, IScheduler scheduler)
     {
-        var result = GetScope($"{bundle.JobDetail.Key.Group}-{bundle.JobDetail.Key.Name}")
+        var result = (IJobTask)GetScope($"{bundle.JobDetail.Key.Group}-{bundle.JobDetail.Key.Name}")
             .Resolve(bundle.JobDetail.JobType);
 
-        if (result is IJobTask { IsInit: false } jobTask)
+        if (!result.IsInit)
         {
             TaskConfig config = GetTaskConfig(bundle.JobDetail.JobType.Name);
             if (config == null)
                 throw new ArgumentNullException($"Task: {bundle.JobDetail.JobType.Name} was not configured");
 
             var dataAccessFactory = _container.Resolve<IDataAccessFactory>();
-            jobTask.Init(_container.Resolve<ILogger>(), dataAccessFactory.Create(config.Bucket, config.Measurement),
-                config.Params, config.UtcTime ? new UtcDateTimeProvider() : new LocalTimeProvider());
-            return jobTask;
+            result.Init(_container.Resolve<ILogger>(), dataAccessFactory.Create(config.Bucket, config.Measurement),
+                config, config.UtcTime ? new UtcDateTimeProvider() : new LocalTimeProvider());
         }
 
-        return (IJob)result;
+        return result;
     }
 
     private TaskConfig GetTaskConfig(string jobTypeName)

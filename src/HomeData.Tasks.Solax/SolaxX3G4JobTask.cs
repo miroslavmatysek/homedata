@@ -1,5 +1,6 @@
 using HomeData.DataAccess;
 using HomeData.Model;
+using HomeData.Model.Config;
 using HomeData.Provider;
 using HomeData.Tasks.Solax.Extensions;
 using HomeData.Tasks.Solax.Model;
@@ -133,7 +134,7 @@ public class SolaxX3G4JobTask : IJobTask
 
     public bool IsInit { get; private set; }
 
-    public void Init(ILogger logger, IMonitoringDataAccess monitoringDataAccess, Dictionary<string, string> taskParams,
+    public void Init(ILogger logger, IMonitoringDataAccess monitoringDataAccess, TaskConfig config,
         ITimeProvider timeProvider)
     {
         IsInit = true;
@@ -141,13 +142,13 @@ public class SolaxX3G4JobTask : IJobTask
         _monitoringDataAccess = monitoringDataAccess;
         _timeProvider = timeProvider;
 
-        _ipAddress = taskParams.GetOrDefaultString(HostParamName, string.Empty);
+        _ipAddress = config.Params.GetOrDefaultString(HostParamName, string.Empty);
         if (string.IsNullOrEmpty(_ipAddress))
             throw new ArgumentNullException(
                 $"Task: {nameof(SolaxX3G4JobTask)} - wrong config - config param: {HostParamName} missing");
 
-        _pass = taskParams.GetOrDefaultString(PasswordParamName, string.Empty);
-        if (!taskParams.ContainsKey(PasswordParamName) || string.IsNullOrEmpty(_pass))
+        _pass = config.Params.GetOrDefaultString(PasswordParamName, string.Empty);
+        if (!config.Params.ContainsKey(PasswordParamName) || string.IsNullOrEmpty(_pass))
             throw new ArgumentNullException(
                 $"Task: {nameof(SolaxX3G4JobTask)} - wrong config - config param: {PasswordParamName} missing");
 

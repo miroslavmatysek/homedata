@@ -6,11 +6,10 @@ public class UsbSerialTextTaskSetup : ITaskSetup
 {
     public UsbSerialTextTaskSetup()
     {
-        Id = Guid.NewGuid();
         Name = nameof(UsbSerialTextTaskSetup);
     }
 
-    public Guid Id { get; }
+    public Guid Id { get; set; }
 
     public string Name { get; }
 

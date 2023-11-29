@@ -1,5 +1,7 @@
 using HomeData.DataAccess;
 using HomeData.Model;
+using HomeData.Model.Config;
+using HomeData.Provider;
 using HomeData.Tasks.Usb.Model;
 using HomeData.Tasks.Usb.Processors;
 using HomeData.Util;
@@ -18,6 +20,7 @@ public class UsbSerialTextJobTask : IJobTask
     private IMonitoringDataAccess _dataAccess;
 
     private MeasureContainer _lastContainer;
+    private ITimeProvider _timeProvider;
 
     public UsbSerialTextJobTask(ISerialTextProcessor serialTextProcessor)
     {
@@ -30,15 +33,17 @@ public class UsbSerialTextJobTask : IJobTask
         get => _setup != null && _serialTextProcessor.IsInit;
     }
 
-    public void Init(ILogger logger, IMonitoringDataAccess da, Dictionary<string, string> taskParams)
+    public void Init(ILogger logger, IMonitoringDataAccess da, TaskConfig config, ITimeProvider timeProvider)
     {
         if (IsInit)
             throw new Exception("Task is already initialized");
 
         _logger = logger;
         _dataAccess = da;
-        _setup = SetupConvert(taskParams);
-        _serialTextProcessor.Init(_setup);
+        _timeProvider = timeProvider;
+        _setup = SetupConvert(config);
+        _serialTextProcessor.Init(_setup, timeProvider);
+        _logger.LogInformation("Task: {TaskName} was initialized", nameof(UsbSerialTextJobTask));
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -46,11 +51,13 @@ public class UsbSerialTextJobTask : IJobTask
         if (!IsInit)
             throw new Exception("Task is not initialized");
 
+        _logger.LogInformation("Task: {TaskName} was started", nameof(UsbSerialTextJobTask));
         var data = _serialTextProcessor.Process();
         if (data != null)
         {
             await SaveData(data);
         }
+        _logger.LogInformation("Task: {TaskName} was finished", nameof(UsbSerialTextJobTask));
     }
 
     private async Task SaveData(MeasureContainer processedData)
@@ -70,16 +77,17 @@ public class UsbSerialTextJobTask : IJobTask
         _lastContainer = processedData;
     }
 
-    private static UsbSerialTextTaskSetup SetupConvert(Dictionary<string, string> taskParams)
+    private static UsbSerialTextTaskSetup SetupConvert(TaskConfig config)
     {
         return new UsbSerialTextTaskSetup()
         {
-            BaudRate = taskParams.GetOrDefaultInt(UsbConstants.BaudRateParamName, UsbConstants.BaudRateDefaultValue),
-            PortName = taskParams.GetOrDefaultString(UsbConstants.PortNameParamName, string.Empty),
-            PortParity = taskParams.GetOrDefaultInt(UsbConstants.PortParityParamName, UsbConstants.PortParityDefaultValue),
-            PortDataBits = taskParams.GetOrDefaultInt(UsbConstants.PortDataBitsParamName, UsbConstants.PortDataBitsDefaultValue),
-            PortHandshake = taskParams.GetOrDefaultInt(UsbConstants.PortHandshakeParamName, UsbConstants.PortHandshakeDefaultValue),
-            PortStopBits = taskParams.GetOrDefaultInt(UsbConstants.PortStopBitsParamName, UsbConstants.PortStopBitsDefaultValue),
+            Id = config.Id,
+            BaudRate = config.Params.GetOrDefaultInt(UsbConstants.BaudRateParamName, UsbConstants.BaudRateDefaultValue),
+            PortName = config.Params.GetOrDefaultString(UsbConstants.PortNameParamName, string.Empty),
+            PortParity = config.Params.GetOrDefaultInt(UsbConstants.PortParityParamName, UsbConstants.PortParityDefaultValue),
+            PortDataBits = config.Params.GetOrDefaultInt(UsbConstants.PortDataBitsParamName, UsbConstants.PortDataBitsDefaultValue),
+            PortHandshake = config.Params.GetOrDefaultInt(UsbConstants.PortHandshakeParamName, UsbConstants.PortHandshakeDefaultValue),
+            PortStopBits = config.Params.GetOrDefaultInt(UsbConstants.PortStopBitsParamName, UsbConstants.PortStopBitsDefaultValue),
         };
     }
 }

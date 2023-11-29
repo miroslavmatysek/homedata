@@ -60,7 +60,7 @@ public static class Composition
     {
         container.Register<ITaskManager, QuartzTaskManager>(Reuse.Singleton);
         container.Register<SolaxX3G4JobTask>(Reuse.Singleton);
-        container.Register<UsbSerialTextJobTask>(Reuse.Scoped);
+        container.Register<UsbSerialTextJobTask>(Reuse.Transient);
         container.Register<IUsbSerialTextService, UsbSerialTextService>(Reuse.Transient);
         container.Register<ITaskServiceProvider, TaskServiceProvider>(Reuse.Singleton);
         container.Register<ISerialTextProcessor, SerialTextProcessor>();

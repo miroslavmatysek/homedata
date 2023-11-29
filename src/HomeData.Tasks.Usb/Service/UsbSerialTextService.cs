@@ -11,7 +11,10 @@ public class UsbSerialTextService : IUsbSerialTextService
     private readonly List<string> _data;
     private readonly object _lock;
     private readonly object _resultLock;
+    private readonly Thread _readThread;
 
+
+    private bool _continue;
     private UsbSerialTextTaskSetup _setup;
     private SerialPort _serialPort;
 
@@ -21,6 +24,8 @@ public class UsbSerialTextService : IUsbSerialTextService
         _data = new List<string>();
         _lock = new object();
         _resultLock = new object();
+        _readThread = new Thread(Read);
+        _continue = false;
     }
 
 
@@ -44,54 +49,36 @@ public class UsbSerialTextService : IUsbSerialTextService
 
     public bool IsRunning
     {
-        get => _serialPort != null && _serialPort.IsOpen;
+        get => _serialPort != null && _continue;
     }
 
     public void Start()
     {
+        if (_continue)
+            return;
+
         lock (_lock)
         {
             if (IsRunning)
                 return;
 
-            _serialPort.DataReceived -= SerialPortOnDataReceived;
-            _serialPort.DataReceived += SerialPortOnDataReceived;
             _serialPort.Open();
-            _serialPort.ReadExisting();
-        }
-    }
-
-    private void SerialPortOnDataReceived(object sender, SerialDataReceivedEventArgs e)
-    {
-        try
-        {
-            var sp = (SerialPort)sender;
-
-            var data = sp.ReadLine();
-
-            while (!string.IsNullOrEmpty(data))
-            {
-                if (data.StartsWith("data:"))
-                {
-                    var cleanData = data.Replace("data:", "").Replace("|", "\"");
-
-                    AddResult(cleanData);
-                }
-                data = sp.ReadLine();
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Usb serial text data loading error: {Message}", ex.Message);
+            _continue = true;
+            _readThread.Start();
         }
     }
 
     public void Stop()
     {
+        if (!IsRunning)
+            return;
+
         lock (_lock)
         {
             if (IsRunning)
             {
+                _continue = false;
+                _readThread.Join();
                 _serialPort.Close();
             }
 
@@ -114,6 +101,32 @@ public class UsbSerialTextService : IUsbSerialTextService
             var result = _data.ToArray();
             _data.Clear();
             return result;
+        }
+    }
+
+    private void Read()
+    {
+        while (_continue)
+        {
+            try
+            {
+                var data = _serialPort.ReadLine();
+                if (data.StartsWith("data:"))
+                {
+                    var cleanData = data.Replace("data:", "").Replace("|", "\"");
+
+                    AddResult(cleanData);
+                }
+                else
+                    Thread.Sleep(20);
+            }
+            catch (TimeoutException)
+            {
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Usb serial text data loading error: {Message}", ex.Message);
+            }
         }
     }
 

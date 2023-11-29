@@ -3,6 +3,8 @@ namespace HomeData.Model.Config;
 [Serializable]
 public class TaskConfig
 {
+    public Guid Id { get; set; } = Guid.NewGuid();
+
     public string Name { get; set; }
 
     public string Measurement { get; set; }
