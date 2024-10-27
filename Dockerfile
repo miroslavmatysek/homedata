@@ -2,8 +2,8 @@
 ARG BUILD_CONFIGURATION=Release
 
 COPY "src/" "src/"
-RUN dotnet restore "HomeData.Worker/HomeData.Worker.csproj"
 WORKDIR "/src/HomeData.Worker"
+RUN dotnet restore "HomeData.Worker.csproj"
 RUN dotnet publish "HomeData.Worker.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/runtime:7.0
