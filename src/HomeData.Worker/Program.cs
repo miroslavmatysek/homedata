@@ -14,6 +14,15 @@ public static class Program
                 services.AddHostedService<Worker>();
             })
             .UseServiceProviderFactory(new DryIocServiceProviderFactory())
+            .ConfigureAppConfiguration((context, builder) =>
+            {
+                builder.AddJsonFile("appsettings.json", false, true);
+                builder.AddJsonFile(
+                    $"appsettings.{context.HostingEnvironment.EnvironmentName}.json",
+                    true,
+                    true);
+                builder.AddEnvironmentVariables();
+            })
             .ConfigureContainer<Container>((hostContext, container) =>
             {
                 container.AddNLog()
