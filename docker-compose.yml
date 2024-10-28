@@ -18,8 +18,8 @@
       DOCKER_INFLUXDB_INIT_MODE: setup
       DOCKER_INFLUXDB_INIT_USERNAME: admin
       DOCKER_INFLUXDB_INIT_PASSWORD: "***PASS****"
-      DOCKER_INFLUXDB_INIT_ORG: my-init-org
-      DOCKER_INFLUXDB_INIT_BUCKET: my-init-bucket
+      DOCKER_INFLUXDB_INIT_ORG: homedata
+      DOCKER_INFLUXDB_INIT_BUCKET: homedata
       DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: "*****"
     restart:
       always

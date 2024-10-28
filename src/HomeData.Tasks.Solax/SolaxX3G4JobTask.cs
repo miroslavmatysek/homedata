@@ -154,6 +154,7 @@ public class SolaxX3G4JobTask : IJobTask
 
         _url = string.Format(RequestPath, _ipAddress);
         _realTimeBody.Add(PwdBodyParam, _pass);
+        _logger.LogInformation("Solax task init for {IpAddress} and pass: {Password}****", _ipAddress, _pass?.Substring(0, 2) );
     }
 
     private MeasureContainer Process(SolaxInvertedRawData data, DateTime time)
