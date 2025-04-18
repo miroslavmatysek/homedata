@@ -1,0 +1,32 @@
+﻿services:
+  timescaledb:
+    container_name: timescaledb
+    image: timescale/timescaledb:latest-pg17
+    networks:
+      - home-data-network
+    environment:
+      - POSTGRES_PASSWORD=h0me_data_g0es
+    ports:
+      - '5432:5432'
+    volumes:
+      - timescale-data:/var/lib/postgresql/data
+  grafana:
+    image: grafana/grafana:11.2.2
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    networks:
+      - home-data-network
+    depends_on:
+      timescaledb:
+        condition: service_started
+networks:
+  home-data-network:
+
+volumes:
+  grafana-storage:
+  timescale-data:
+  

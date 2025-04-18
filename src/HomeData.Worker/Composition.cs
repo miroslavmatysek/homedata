@@ -1,4 +1,3 @@
-using System.Reflection;
 using DryIoc;
 using HomeData.DataAccess;
 using HomeData.DataAccess.Influxdb;
