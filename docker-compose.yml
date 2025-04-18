@@ -1,28 +1,15 @@
 ﻿services:
-  influxdb:
-    image: influxdb:2.7.10
-    container_name: influxdb
-    ports:
-      - '8086:8086'
-    volumes:
-      - type: volume
-        source: influxdb2-data
-        target: /var/lib/influxdb2
-      - type: volume
-        source: influxdb2-config
-        target: /etc/influxdb2
-      - type: volume
-        source: influxdb2-backup
-        target: /backups
+  timescaledb:
+    container_name: timescaledb
+    image: timescale/timescaledb:latest-pg17
+    networks:
+      - home-data-network
     environment:
-      DOCKER_INFLUXDB_INIT_MODE: setup
-      DOCKER_INFLUXDB_INIT_USERNAME: admin
-      DOCKER_INFLUXDB_INIT_PASSWORD: "***PASS****"
-      DOCKER_INFLUXDB_INIT_ORG: homedata
-      DOCKER_INFLUXDB_INIT_BUCKET: homedata
-      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: "*****"
-    restart:
-      always
+      - POSTGRES_PASSWORD=h0me_data_g0es
+    ports:
+      - '5432:5432'
+    volumes:
+      - timescale-data:/var/lib/postgresql/data
   grafana:
     image: grafana/grafana:11.2.2
     container_name: grafana
@@ -45,16 +32,12 @@
     networks:
       - home-data-network
     depends_on:
-      influxdb:
+      timescaledb:
         condition: service_started
 networks:
   home-data-network:
 
 volumes:
-  rediscert:
-  redisdata:
-  influxdb2-data:
-  influxdb2-config:
-  influxdb2-backup:
   grafana-storage:
+  timescale-data:
   
