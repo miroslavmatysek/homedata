@@ -30,7 +30,7 @@ public class TimescaleDbMonitoringDataAccess : IMonitoringDataAccess
     {
         return new TimeScaleDbMeasurementFieldContainer(_tableName).With(new DateTimeMeasureItem(DateTimeMeasureItemField)
         {
-            DateTime = time
+            ItemValue = time
         });
     }
 

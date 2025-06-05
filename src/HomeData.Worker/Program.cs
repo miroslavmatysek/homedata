@@ -26,9 +26,9 @@ public static class Program
             .ConfigureContainer<Container>((hostContext, container) =>
             {
                 container.AddNLog()
-                    .AddConfiguration(hostContext.Configuration)
+                    .AddConfiguration(hostContext.Configuration, out var config)
                     .AddQuartz()
-                    .AddServices();
+                    .AddServices(config);
                 container.Register<Worker>();
             })
             .Build();

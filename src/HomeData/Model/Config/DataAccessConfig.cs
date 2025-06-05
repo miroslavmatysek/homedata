@@ -7,4 +7,6 @@ public class DataAccessConfig
     public string ApiToken { get; set; }
 
     public string Organization { get; set; }
+    
+    public string ConnectionString { get; set; }
 }
