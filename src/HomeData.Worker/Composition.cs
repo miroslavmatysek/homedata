@@ -1,7 +1,11 @@
-using System.Reflection;
 using DryIoc;
 using HomeData.DataAccess;
 using HomeData.DataAccess.Influxdb;
+using HomeData.DataAccess.TimescaleDb;
+using HomeData.DataAccess.TimescaleDb.Dao;
+using HomeData.DataAccess.TimescaleDb.Dao.Npgsql;
+using HomeData.DataAccess.TimescaleDb.Scope;
+using HomeData.DataAccess.TimescaleDb.Scope.Npgsql;
 using HomeData.Model.Config;
 using HomeData.Service;
 using HomeData.Tasks;
@@ -23,10 +27,6 @@ public static class Composition
     public static Container AddNLog(this Container container)
     {
         LogManager.Setup().LoadConfigurationFromFile("nlog.config");
-
-        LogManager.AddHiddenAssembly(Assembly.Load(new AssemblyName("Microsoft.Extensions.Logging")));
-        LogManager.AddHiddenAssembly(Assembly.Load(new AssemblyName("Microsoft.Extensions.Logging.Abstractions")));
-        LogManager.AddHiddenAssembly(Assembly.Load(new AssemblyName("NLog.Extensions.Logging")));
 
         var loggerProvider =
             new NLogLoggerProvider(new NLogProviderOptions(), LogManager.LogFactory);
@@ -56,7 +56,7 @@ public static class Composition
         return container;
     }
 
-    public static Container AddServices(this Container container)
+    public static Container AddServices(this Container container, MainConfig config)
     {
         container.Register<ITaskManager, QuartzTaskManager>(Reuse.Singleton);
         container.Register<SolaxX3G4JobTask>(Reuse.Singleton);
@@ -64,19 +64,37 @@ public static class Composition
         container.Register<IUsbSerialTextService, UsbSerialTextService>(Reuse.Transient);
         container.Register<ITaskServiceProvider, TaskServiceProvider>(Reuse.Singleton);
         container.Register<ISerialTextProcessor, SerialTextProcessor>();
-        container.Register<IDataAccessFactory, InfluxDataAccessFactory>(Reuse.Singleton);
+
+        if (!string.IsNullOrEmpty(config.DataAccess.ConnectionString))
+        {
+            container.RegisterDelegate<IScopeProvider>(_ => new NpgsqlScopeProvider(config.DataAccess.ConnectionString), Reuse.Singleton);
+            container.Register<IDataAccessFactory, TimeScaleDbDataAccessFactory>();
+            container.Register<IMeasurementDao, NpgsqlMeasurementDao>();
+        }
+        else
+        {
+            container.Register<IDataAccessFactory, InfluxDataAccessFactory>(Reuse.Singleton);
+        }
+        
         return container;
     }
 
-    public static Container AddConfiguration(this Container container, IConfiguration configuration)
+    public static Container AddConfiguration(this Container container, IConfiguration configuration, out MainConfig mainConfig)
     {
         var tasksConfig = new TasksConfig();
         configuration.Bind("tasks", tasksConfig);
         container.Use(tasksConfig);
 
-        DataAccessConfig dataAccessConfig = new DataAccessConfig();
+        var dataAccessConfig = new DataAccessConfig();
         configuration.Bind("dataAccess", dataAccessConfig);
         container.Use(dataAccessConfig);
+
+        mainConfig = new MainConfig()
+        {
+            Tasks = tasksConfig,
+            DataAccess = dataAccessConfig
+        };
+        container.Use(mainConfig);
         return container;
     }
 }

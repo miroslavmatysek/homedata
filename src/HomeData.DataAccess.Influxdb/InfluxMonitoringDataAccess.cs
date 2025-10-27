@@ -30,12 +30,6 @@ public class InfluxMonitoringDataAccess : IMonitoringDataAccess
         return new InfluxMeasurementFieldContainer(pd);
     }
 
-    public async Task WritePointAsync(string field, int value, DateTime time)
-    {
-        var point = PointData.Measurement(_measurement).Field(field, value).Timestamp(time, WritePrecision.S);
-        await _client.GetWriteApiAsync().WritePointAsync(point, _bucket, _organization);
-    }
-
     public async Task WritePointAsync(IMeasurementFieldContainer points)
     {
         _logger.LogTrace("Try to save points [{Points}]", points.Count);

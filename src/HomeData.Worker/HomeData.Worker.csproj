@@ -16,16 +16,16 @@
     <ItemGroup>
         <PackageReference Include="DryIoc.dll" Version="5.4.3" />
         <PackageReference Include="DryIoc.Microsoft.DependencyInjection" Version="6.2.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.2" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
-        <PackageReference Include="NLog" Version="5.3.4" />
-        <PackageReference Include="NLog.Extensions.Logging" Version="5.3.14" />
-        <PackageReference Include="Quartz" Version="3.13.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.5" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.5" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.5" />
+        <PackageReference Include="NLog.Extensions.Logging" Version="5.5.0" />
+        <PackageReference Include="Quartz" Version="3.14.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\HomeData.DataAccess.Influxdb\HomeData.DataAccess.Influxdb.csproj" />
+      <ProjectReference Include="..\HomeData.DataAccess.TimescaleDb\HomeData.DataAccess.TimescaleDb.csproj" />
       <ProjectReference Include="..\HomeData.Service\HomeData.Service.csproj" />
       <ProjectReference Include="..\HomeData.Tasks.Manager\HomeData.Tasks.Manager.csproj" />
       <ProjectReference Include="..\HomeData.Tasks.Solax\HomeData.Tasks.Solax.csproj" />

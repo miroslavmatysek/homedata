@@ -24,7 +24,6 @@ public class SolaxX3G4JobTask : IJobTask
     private readonly HttpClient _httpClient;
     private readonly Dictionary<string, string> _realTimeBody;
     private readonly Dictionary<string, string> _deltaNameMap;
-    private readonly TimeSpan _minDataInterval = TimeSpan.FromSeconds(60);
     private ILogger _logger;
     private IMonitoringDataAccess _monitoringDataAccess;
     private ITimeProvider _timeProvider;
@@ -117,15 +116,10 @@ public class SolaxX3G4JobTask : IJobTask
 
     private async Task SaveData(MeasureContainer processedData)
     {
-        var toSave = _lastContainer == null ? processedData : _lastContainer.Merge(processedData);
-
         var fields = _monitoringDataAccess.Create(processedData.Time);
-        foreach (var item in toSave.Data)
+        foreach (var item in processedData.Data)
         {
-            if (item.Changed || item.ChangedInterval >= _minDataInterval)
-            {
-                fields.With(item);
-            }
+            fields.With(item);
         }
 
         await _monitoringDataAccess.WritePointAsync(fields);
@@ -154,7 +148,8 @@ public class SolaxX3G4JobTask : IJobTask
 
         _url = string.Format(RequestPath, _ipAddress);
         _realTimeBody.Add(PwdBodyParam, _pass);
-        _logger.LogInformation("Solax task init for {IpAddress} and pass: {Password}****", _ipAddress, _pass?.Substring(0, 2) );
+        _logger.LogInformation("Solax task init for {IpAddress} and pass: {Password}****", _ipAddress,
+            _pass?.Substring(0, 2));
     }
 
     private MeasureContainer Process(SolaxInvertedRawData data, DateTime time)

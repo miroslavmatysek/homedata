@@ -5,5 +5,6 @@ public enum MeasureItemValueType
     Int,
     Int64,
     Decimal,
-    String
+    String,
+    DateTime
 }

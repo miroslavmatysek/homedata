@@ -1,4 +1,4 @@
-# HomeData [Alpha]
+# HomeData [Beta]
 The goal of this project is to collect data from the household and save it to the database for next processing / visualization.
 
 ## Data collection
@@ -8,6 +8,7 @@ The goal of this project is to collect data from the household and save it to th
 ## Databases
 
 - InfluxDb2
+- timescale DB
 
 ## Visualization 
 

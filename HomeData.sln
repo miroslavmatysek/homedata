@@ -1,28 +1,29 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Worker", "HomeData.Worker\HomeData.Worker.csproj", "{DC014497-A929-400B-9577-79B988206A8D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Worker", "src\HomeData.Worker\HomeData.Worker.csproj", "{DC014497-A929-400B-9577-79B988206A8D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Items", "Items", "{E5D42C86-F591-480D-90E0-C4F3A1619A85}"
 	ProjectSection(SolutionItems) = preProject
-		..\README.md = ..\README.md
-		..\grafana\solax_dashboardjson = ..\grafana\solax_dashboardjson
-		..\Dockerfile = ..\Dockerfile
-		..\docker-compose.yml = ..\docker-compose.yml
+		docker-compose.yml = docker-compose.yml
+		Dockerfile = Dockerfile
+		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData", "HomeData\HomeData.csproj", "{60157781-399D-4A61-BD4D-BA535F9B243B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData", "src\HomeData\HomeData.csproj", "{60157781-399D-4A61-BD4D-BA535F9B243B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.DataAccess.Influxdb", "HomeData.DataAccess.Influxdb\HomeData.DataAccess.Influxdb.csproj", "{7993B463-A9AC-4042-B665-1E1C7C639F5F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.DataAccess.Influxdb", "src\HomeData.DataAccess.Influxdb\HomeData.DataAccess.Influxdb.csproj", "{7993B463-A9AC-4042-B665-1E1C7C639F5F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Tasks.Manager", "HomeData.Tasks.Manager\HomeData.Tasks.Manager.csproj", "{EDFD0B8B-9AB6-472B-8B9E-BA66F5CC9251}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Tasks.Manager", "src\HomeData.Tasks.Manager\HomeData.Tasks.Manager.csproj", "{EDFD0B8B-9AB6-472B-8B9E-BA66F5CC9251}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Tasks.Solax", "HomeData.Tasks.Solax\HomeData.Tasks.Solax.csproj", "{705A87FC-290C-4578-A76D-4E412C7AE646}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Tasks.Solax", "src\HomeData.Tasks.Solax\HomeData.Tasks.Solax.csproj", "{705A87FC-290C-4578-A76D-4E412C7AE646}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Test", "HomeData.Test\HomeData.Test.csproj", "{2D527D60-BEEF-4678-A735-AA8F7E6AE12F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Test", "src\HomeData.Test\HomeData.Test.csproj", "{2D527D60-BEEF-4678-A735-AA8F7E6AE12F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Tasks.Usb", "HomeData.Tasks.Usb\HomeData.Tasks.Usb.csproj", "{D7062C8B-4B67-46F6-9BC8-8FE4D946911D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Tasks.Usb", "src\HomeData.Tasks.Usb\HomeData.Tasks.Usb.csproj", "{D7062C8B-4B67-46F6-9BC8-8FE4D946911D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Service", "HomeData.Service\HomeData.Service.csproj", "{95E4E77C-CFBC-4812-A1D4-512E28719299}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Service", "src\HomeData.Service\HomeData.Service.csproj", "{95E4E77C-CFBC-4812-A1D4-512E28719299}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.DataAccess.TimescaleDb", "src\HomeData.DataAccess.TimescaleDb\HomeData.DataAccess.TimescaleDb.csproj", "{388B6CAC-B58A-4A4F-8397-2F19D5DF2139}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,5 +63,9 @@ Global
 		{95E4E77C-CFBC-4812-A1D4-512E28719299}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95E4E77C-CFBC-4812-A1D4-512E28719299}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95E4E77C-CFBC-4812-A1D4-512E28719299}.Release|Any CPU.Build.0 = Release|Any CPU
+		{388B6CAC-B58A-4A4F-8397-2F19D5DF2139}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{388B6CAC-B58A-4A4F-8397-2F19D5DF2139}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{388B6CAC-B58A-4A4F-8397-2F19D5DF2139}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{388B6CAC-B58A-4A4F-8397-2F19D5DF2139}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

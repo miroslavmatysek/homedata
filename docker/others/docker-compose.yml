@@ -18,17 +18,6 @@
       - '3000:3000'
     volumes:
       - grafana-storage:/var/lib/grafana
-  homedata:
-    image: homedata
-    container_name: homedata
-    build:
-      context: .
-      dockerfile: Dockerfile
-    environment:
-      DOTNET_ENVIRONMENT: "Production"
-      "dataAccess:url": "http://influxdb:8086"
-      "dataAccess:apiToken": "*****APITOKEN*****"
-    restart: always # unless-stopped      
     networks:
       - home-data-network
     depends_on:
