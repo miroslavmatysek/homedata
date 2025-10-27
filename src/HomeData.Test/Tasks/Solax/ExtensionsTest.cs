@@ -1,4 +1,4 @@
-using FluentAssertions;
+using AwesomeAssertions;
 using HomeData.Tasks.Solax.Extensions;
 
 namespace HomeData.Test.Tasks.Solax;

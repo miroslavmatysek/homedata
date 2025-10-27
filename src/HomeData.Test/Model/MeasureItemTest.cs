@@ -1,4 +1,4 @@
-using FluentAssertions;
+using AwesomeAssertions;
 using HomeData.Model;
 
 namespace HomeData.Test.Model;
