@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Service", "src\Hom
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.DataAccess.TimescaleDb", "src\HomeData.DataAccess.TimescaleDb\HomeData.DataAccess.TimescaleDb.csproj", "{388B6CAC-B58A-4A4F-8397-2F19D5DF2139}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeData.Api", "src\HomeData.Api\HomeData.Api.csproj", "{1CEEF8EB-981B-454F-87B0-50C1FFCC51D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,5 +69,9 @@ Global
 		{388B6CAC-B58A-4A4F-8397-2F19D5DF2139}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{388B6CAC-B58A-4A4F-8397-2F19D5DF2139}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{388B6CAC-B58A-4A4F-8397-2F19D5DF2139}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CEEF8EB-981B-454F-87B0-50C1FFCC51D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CEEF8EB-981B-454F-87B0-50C1FFCC51D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CEEF8EB-981B-454F-87B0-50C1FFCC51D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CEEF8EB-981B-454F-87B0-50C1FFCC51D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

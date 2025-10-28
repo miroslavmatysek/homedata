@@ -1,4 +1,3 @@
-using DryIoc;
 using HomeData.DataAccess;
 using HomeData.DataAccess.Influxdb;
 using HomeData.DataAccess.TimescaleDb;
@@ -24,77 +23,68 @@ namespace HomeData.Worker;
 
 public static class Composition
 {
-    public static Container AddNLog(this Container container)
+    public static IServiceCollection AddNLog(this IServiceCollection sc)
     {
         LogManager.Setup().LoadConfigurationFromFile("nlog.config");
+        sc.AddLogging(builder =>
+        {
+            builder.ClearProviders();
+            builder.AddNLog();
+        });
 
-        var loggerProvider =
-            new NLogLoggerProvider(new NLogProviderOptions(), LogManager.LogFactory);
-        ILoggerFactory loggerFactory = new NLogLoggerFactory(loggerProvider);
-        container.Use(loggerFactory);
-        container.Use(loggerProvider);
 
-
-        var loggerFactoryMethod =
-            typeof(LoggerFactoryExtensions).GetMethod("CreateLogger", new[] { typeof(ILoggerFactory) });
-        container.Register(typeof(ILogger<>), made: Made.Of(
-            req => loggerFactoryMethod?.MakeGenericMethod(req.ServiceType.GenericTypeArguments[0])));
-        var commonLogger = loggerFactory.CreateLogger("common");
-        container.RegisterInstance(typeof(Microsoft.Extensions.Logging.ILogger), commonLogger);
-        commonLogger.LogInformation("NLog init");
-        return container;
+        return sc;
     }
 
-    public static Container AddQuartz(this Container container)
+    public static IServiceCollection AddQuartz(this IServiceCollection sc)
     {
         ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
-
-        container.RegisterInstance(schedulerFactory);
-
-        IJobFactory jobFactory = new QuartzJobFactory(container);
-        container.RegisterInstance(jobFactory);
-        return container;
+        sc.AddSingleton(schedulerFactory);
+        sc.AddSingleton<IJobFactory>(provider => new QuartzJobFactory(provider));
+        return sc;
     }
 
-    public static Container AddServices(this Container container, MainConfig config)
+    public static IServiceCollection AddServices(this IServiceCollection sc, MainConfig config)
     {
-        container.Register<ITaskManager, QuartzTaskManager>(Reuse.Singleton);
-        container.Register<SolaxX3G4JobTask>(Reuse.Singleton);
-        container.Register<UsbSerialTextJobTask>(Reuse.Transient);
-        container.Register<IUsbSerialTextService, UsbSerialTextService>(Reuse.Transient);
-        container.Register<ITaskServiceProvider, TaskServiceProvider>(Reuse.Singleton);
-        container.Register<ISerialTextProcessor, SerialTextProcessor>();
+        sc.AddSingleton<ITaskManager, QuartzTaskManager>();
+        sc.AddSingleton<SolaxX3G4JobTask>();
+        sc.AddSingleton<UsbSerialTextJobTask>();
+        sc.AddSingleton<IUsbSerialTextService, UsbSerialTextService>();
+        sc.AddSingleton<ITaskServiceProvider, TaskServiceProvider>();
+        sc.AddSingleton<ISerialTextProcessor, SerialTextProcessor>();
 
         if (!string.IsNullOrEmpty(config.DataAccess.ConnectionString))
         {
-            container.RegisterDelegate<IScopeProvider>(_ => new NpgsqlScopeProvider(config.DataAccess.ConnectionString), Reuse.Singleton);
-            container.Register<IDataAccessFactory, TimeScaleDbDataAccessFactory>();
-            container.Register<IMeasurementDao, NpgsqlMeasurementDao>();
+            sc.AddSingleton<IScopeProvider>(provider =>
+                new NpgsqlScopeProvider(provider.GetRequiredService<MainConfig>().DataAccess.ConnectionString));
+            sc.AddTransient<IDataAccessFactory, TimeScaleDbDataAccessFactory>();
+            sc.AddTransient<IMeasurementDao, NpgsqlMeasurementDao>();
         }
         else
         {
-            container.Register<IDataAccessFactory, InfluxDataAccessFactory>(Reuse.Singleton);
+            sc.AddSingleton<IDataAccessFactory, InfluxDataAccessFactory>();
         }
-        
-        return container;
+
+        return sc;
     }
 
-    public static Container AddConfiguration(this Container container, IConfiguration configuration, out MainConfig mainConfig)
+    public static IServiceCollection AddConfiguration(this IServiceCollection sc, IConfiguration configuration,
+        out MainConfig mainConfig)
     {
         var tasksConfig = new TasksConfig();
         configuration.Bind("tasks", tasksConfig);
-        container.Use(tasksConfig);
+        sc.AddSingleton(tasksConfig);
 
         var dataAccessConfig = new DataAccessConfig();
         configuration.Bind("dataAccess", dataAccessConfig);
-        container.Use(dataAccessConfig);
+        sc.AddSingleton(dataAccessConfig);
 
-        mainConfig = new MainConfig()
+        mainConfig = new MainConfig
         {
             Tasks = tasksConfig,
             DataAccess = dataAccessConfig
         };
-        container.Use(mainConfig);
-        return container;
+        sc.AddSingleton(mainConfig);
+        return sc;
     }
 }

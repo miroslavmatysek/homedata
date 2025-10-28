@@ -9,6 +9,8 @@ public interface IMeasurementFieldContainer
     IMeasurementFieldContainer With(string name, int? value);
 
     IMeasurementFieldContainer With(string name, decimal? value);
+    
+    IMeasurementFieldContainer With(string name, float? value);
 
     IMeasurementFieldContainer With(MeasureItem item);
 

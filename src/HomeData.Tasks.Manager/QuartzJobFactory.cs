@@ -1,7 +1,7 @@
-using DryIoc;
 using HomeData.DataAccess;
 using HomeData.Model.Config;
 using HomeData.Provider.Common;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Quartz;
 using Quartz.Spi;
@@ -10,19 +10,19 @@ namespace HomeData.Tasks.Manager;
 
 public class QuartzJobFactory : IJobFactory, IDisposable
 {
-    private readonly Container _container;
-    private readonly Dictionary<string, IResolverContext> _scopes;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly Dictionary<string, IServiceScope> _scopes;
 
-    public QuartzJobFactory(Container container)
+    public QuartzJobFactory(IServiceProvider serviceProvider)
     {
-        _container = container;
-        _scopes = new Dictionary<string, IResolverContext>();
+        _serviceProvider = serviceProvider;
+        _scopes = new Dictionary<string, IServiceScope>();
     }
 
     public IJob NewJob(TriggerFiredBundle bundle, IScheduler scheduler)
     {
         var result = (IJobTask)GetScope($"{bundle.JobDetail.Key.Group}-{bundle.JobDetail.Key.Name}")
-            .Resolve(bundle.JobDetail.JobType);
+            .ServiceProvider.GetRequiredService(bundle.JobDetail.JobType);
 
         if (!result.IsInit)
         {
@@ -30,8 +30,9 @@ public class QuartzJobFactory : IJobFactory, IDisposable
             if (config == null)
                 throw new ArgumentNullException($"Task: {bundle.JobDetail.JobType.Name} was not configured");
 
-            var dataAccessFactory = _container.Resolve<IDataAccessFactory>();
-            result.Init(_container.Resolve<ILogger>(), dataAccessFactory.Create(config.Bucket, config.Measurement),
+            var dataAccessFactory = _serviceProvider.GetRequiredService<IDataAccessFactory>();
+            result.Init(_serviceProvider.GetRequiredService<ILogger>(),
+                dataAccessFactory.Create(config.Bucket, config.Measurement),
                 config, config.UtcTime ? new UtcDateTimeProvider() : new LocalTimeProvider());
         }
 
@@ -41,15 +42,15 @@ public class QuartzJobFactory : IJobFactory, IDisposable
     private TaskConfig GetTaskConfig(string jobTypeName)
     {
         var key = jobTypeName.Replace("JobTask", "").ToLower();
-        var allConfig = _container.Resolve<TasksConfig>();
+        var allConfig = _serviceProvider.GetRequiredService<TasksConfig>();
         return allConfig.Items.FirstOrDefault(j => key.Equals(j.Name.ToLower()));
     }
 
-    private IResolverContext GetScope(string key)
+    private IServiceScope GetScope(string key)
     {
         if (!_scopes.ContainsKey(key))
         {
-            _scopes.Add(key, _container.OpenScope(key));
+            _scopes.Add(key, _serviceProvider.CreateScope());
         }
 
         return _scopes[key];

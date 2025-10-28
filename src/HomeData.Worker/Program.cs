@@ -1,6 +1,3 @@
-using DryIoc;
-using DryIoc.Microsoft.DependencyInjection;
-
 namespace HomeData.Worker;
 
 public static class Program
@@ -13,7 +10,6 @@ public static class Program
                 services.AddOptions();
                 services.AddHostedService<Worker>();
             })
-            .UseServiceProviderFactory(new DryIocServiceProviderFactory())
             .ConfigureAppConfiguration((context, builder) =>
             {
                 builder.AddJsonFile("appsettings.json", false, true);
@@ -23,13 +19,13 @@ public static class Program
                     true);
                 builder.AddEnvironmentVariables();
             })
-            .ConfigureContainer<Container>((hostContext, container) =>
+            .ConfigureServices((context, collection) =>
             {
-                container.AddNLog()
-                    .AddConfiguration(hostContext.Configuration, out var config)
+                collection.AddNLog()
+                    .AddConfiguration(context.Configuration, out var config)
                     .AddQuartz()
-                    .AddServices(config);
-                container.Register<Worker>();
+                    .AddServices(config)
+                    .AddSingleton<Worker>();
             })
             .Build();
 

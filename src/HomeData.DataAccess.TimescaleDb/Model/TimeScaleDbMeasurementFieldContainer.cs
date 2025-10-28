@@ -38,6 +38,14 @@ public class TimeScaleDbMeasurementFieldContainer : IMeasurementFieldContainer
         });
     }
 
+    public IMeasurementFieldContainer With(string name, float? value)
+    {
+        return With(new FloatMeasureItem(name)
+        {
+            ItemValue = value
+        });
+    }
+
     public IMeasurementFieldContainer With(MeasureItem item)
     {
         _items.Add(item);

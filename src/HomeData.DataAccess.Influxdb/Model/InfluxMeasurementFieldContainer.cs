@@ -44,6 +44,17 @@ public class InfluxMeasurementFieldContainer : IMeasurementFieldContainer
 
     }
 
+    public IMeasurementFieldContainer With(string name, float? value)
+    {
+        if (value.HasValue)
+        {
+            _count++;
+            _pointData = _pointData.Field(name, value);
+        }
+
+        return this;
+    }
+
     private IMeasurementFieldContainer With(string name, object? value)
     {
         if (value != null)

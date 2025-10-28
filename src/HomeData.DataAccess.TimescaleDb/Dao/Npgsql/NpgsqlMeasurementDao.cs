@@ -29,6 +29,7 @@ public class NpgsqlMeasurementDao : IMeasurementDao
             MeasureItemValueType.Int => NpgsqlDbType.Integer,
             MeasureItemValueType.String => NpgsqlDbType.Varchar,
             MeasureItemValueType.Int64 => NpgsqlDbType.Bigint,
+            MeasureItemValueType.Float => NpgsqlDbType.Double,
             _ => throw new ArgumentOutOfRangeException()
         };
 }
